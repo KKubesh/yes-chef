@@ -699,6 +699,8 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
 .dlg .hint { font-size: 14px; color: var(--ink-soft); margin: 4px 0 0; }
 .field { display: grid; gap: 5px; margin-bottom: 14px; }
 .field[hidden], .field-pair[hidden], .weeks[hidden] { display: none; }
+.support { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 10px; }
+.support a { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 .data-io { border-top: 1px solid var(--line); margin: 14px 0 6px; padding-top: 12px; }
 .data-io .label { font-weight: 600; display: block; margin-bottom: 8px; }
 .data-io-btns { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -1000,6 +1002,7 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
     </div>
     <p class="hint" id="s-file"></p>
     <button type="button" class="btn quiet" id="s-switch" style="padding-left:0">Use a different data file</button>
+    <p class="hint support">Yes, Chef is free and runs entirely on your device. If it helps you focus, you can <a href="https://buymeacoffee.com/kkubesh" target="_blank" rel="noopener noreferrer">buy me a coffee &#9749;</a>.</p>
     <div class="dlg-foot">
       <span></span>
       <div class="right">

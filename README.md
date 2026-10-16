@@ -76,12 +76,16 @@ Downloading a web page file from someone can reasonably make you pause, so here'
 Because this is a plain file, anyone could edit a copy and pass it along. Get it from Erro directly, or from the one place it's shared. To double-check a copy, compare its fingerprint (SHA-256) with the one below. If they match, the file is exactly the one Erro released.
 
 <!-- checksum:start -->
-`ee4574fb68d6300b3a7bfa327360726e22b5e9449dde860428e880c38d3dfe53`
+`01ef51d3ada4947bfc1fa2c04392e3aca88ea2c909d8dc9c62d745180060d2dd`
 <!-- checksum:end -->
 
 - **Mac:** open Terminal, type `shasum -a 256 ` (with a space at the end), drag the file into the window, and press Return.
 - **Windows:** in PowerShell, run `Get-FileHash yes-chef.html`
 - **Chromebook:** there's no built-in tool for this, so check the copy on a Mac or PC before moving it over.
+
+## Support
+
+Yes, Chef is free. If it helps you focus, you can [buy me a coffee](https://buymeacoffee.com/kkubesh). The link at the bottom of Settings opens that page in a new tab; it's a plain link, so the app itself still never connects anywhere.
 
 ## Good to know
 
