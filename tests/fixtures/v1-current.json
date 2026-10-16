@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "settings": {
+    "pointsPerMinute": 5,
+    "phoneCutPct": 20,
+    "check": "custom",
+    "checkAsk": "Did you check Slack?",
+    "checkName": "Slack",
+    "minSessionMin": 2,
+    "autoEndShift": "newday",
+    "holdMinutes": 2,
+    "burstMinutes": 15,
+    "chime": false,
+    "notify": false,
+    "theme": "dark"
+  },
+  "tickets": [
+    {
+      "id": "c1",
+      "name": "Live ticket",
+      "type": "task",
+      "area": "work",
+      "note": "",
+      "ready": false,
+      "holdUntil": null,
+      "createdAt": 1791926628670,
+      "doneAt": null,
+      "order": -3
+    },
+    {
+      "id": "c2",
+      "name": "Archived",
+      "type": "task",
+      "area": "work",
+      "note": "",
+      "ready": false,
+      "holdUntil": null,
+      "createdAt": 1791836628670,
+      "doneAt": 1791851028670,
+      "order": 1,
+      "archivedAt": 1791858228670,
+      "shiftId": "sh1"
+    },
+    {
+      "id": "c3",
+      "name": "Practice slip",
+      "type": "task",
+      "area": "work",
+      "note": "",
+      "ready": false,
+      "holdUntil": null,
+      "createdAt": 1791933828670,
+      "doneAt": null,
+      "order": -10,
+      "tutorial": true
+    }
+  ],
+  "sessions": [
+    {
+      "id": "cs1",
+      "ticketId": "c2",
+      "ticketName": "Archived",
+      "area": "work",
+      "mode": "open",
+      "startedAt": 1791847428670,
+      "endedAt": 1791849228670,
+      "durationSec": 1800,
+      "minutes": 30,
+      "phone": false,
+      "points": 150,
+      "cutPct": 0,
+      "avoided": "Slack"
+    },
+    {
+      "id": "cs2",
+      "ticketId": "c1",
+      "ticketName": "Live ticket",
+      "area": "work",
+      "mode": "open",
+      "startedAt": 1791937428670,
+      "endedAt": 1791937488670,
+      "durationSec": 60,
+      "minutes": 1,
+      "phone": false,
+      "points": 5,
+      "cutPct": 0,
+      "checked": false,
+      "quick": true
+    },
+    {
+      "id": "cs3",
+      "ticketId": "c3",
+      "ticketName": "Practice slip",
+      "area": "work",
+      "mode": "open",
+      "startedAt": 1791939228670,
+      "endedAt": 1791941028670,
+      "durationSec": 1800,
+      "minutes": 30,
+      "phone": false,
+      "points": 150,
+      "cutPct": 0,
+      "checked": false,
+      "tutorial": true
+    }
+  ],
+  "rewards": [
+    {
+      "id": "r1",
+      "name": "15-minute break",
+      "price": 150,
+      "size": "small"
+    }
+  ],
+  "purchases": [],
+  "shifts": [
+    {
+      "id": "sh1",
+      "startedAt": 1791843828670,
+      "endedAt": 1791858228670,
+      "auto": true,
+      "ticketIds": [
+        "c2"
+      ],
+      "sessions": 1,
+      "minutes": 30,
+      "points": 150,
+      "phoneFree": 1,
+      "checked": 1,
+      "checkLabel": "Slack-free",
+      "byTicket": [
+        {
+          "ticketId": "c2",
+          "name": "Archived",
+          "sessions": 1,
+          "minutes": 30,
+          "points": 150,
+          "spiked": true
+        }
+      ]
+    }
+  ],
+  "shiftStartedAt": 1791858228670,
+  "tour": "done",
+  "setupDone": true,
+  "active": null,
+  "_expect": {
+    "points": 150,
+    "note": "points shown after loading; every ticket and session id must survive a save"
+  }
+}

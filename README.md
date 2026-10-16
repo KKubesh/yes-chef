@@ -1,12 +1,38 @@
-# Yes, Chef: browser-only version
+# Yes, Chef
 
-A single file, `yes-chef.html`, that runs Yes, Chef in Chrome with no server, no Linux and no internet. It's made for Chromebooks, but it works in Chrome anywhere.
+A focus app built like a kitchen ticket rail. Everything you have in flight is a slip on the rail. Pull one and work it, put it on hold while you wait on someone, and spike it when it's done. Focused time earns points toward rewards you pick yourself.
 
-This is a separate copy. The main app in `Documents/Yes Chef` is unchanged and still runs the way it always has.
+**[Try it in your browser](https://kkubesh.github.io/yes-chef/)**. No account, no install, and nothing you type leaves your device.
+
+![The Yes, Chef ticket rail](docs/screenshot.png)
+
+## Why I made this
+
+I've tried a lot of planning apps. The thing that's worked best for me is a plain paper checklist, because it's always sitting there in front of me. The trouble is a notebook gets left behind, and an app I can open anywhere is an app I tell myself I'll check later.
+
+My days also don't look like a neat to-do list. I usually have two or three things running at once. Starting is hard, guessing how long things take is hard, and every time I switch I lose the thread. The times I've focused best were long single-project stretches. I loved Cal Newport's *Deep Work*, but I've always struggled to actually get into it day to day. This is my attempt to make getting there easier.
+
+A kitchen ticket rail fixed that problem a long time ago. Every order is a slip you can see. You pull one, work it, and spike it when it's done. Anything you're waiting on gets held and comes back when it's ready. Nothing lives only in your head. Yes, Chef is that rail for my day: one slip at a time and a spike that shows what I actually finished.
+
+It runs entirely on your own device. No account, no server, nothing sent anywhere. I built it for me, and I'm sharing it in case it helps you too.
+
+Feedback is welcome. If you have an idea or hit a problem, open an issue on this repo.
+
+## What it does
+
+- **The rail:** every task is a slip you can see. Filter it to work or personal, and rename the slip types to fit how you work.
+- **Focus sessions:** a timed burst (10 to 45 minutes, or your own length) or an open clock that counts up until you stop. Jot where you left off right on the slip.
+- **Hold:** waiting on a reply? Put the slip on hold and it comes back to the front, with a chime, when the time is up.
+- **A quick check:** after each session, one yes or no question about what you're keeping away from (your phone, by default). A No earns full points.
+- **Points and rewards:** focused minutes earn points to spend in your own reward shop, like a break, a coffee run or dinner out.
+- **The spike and shifts:** finished slips land on the spike. End a shift to get a receipt of what you worked on, kept under Past shifts.
+- **Your data:** saved to a file you choose, or in the browser on a phone, with Export and Import for backups.
 
 ## Use it on a Chromebook
 
-1. Put `yes-chef.html` in **My files** (download it from the chat, or copy it over on a USB stick or through Google Drive).
+The easiest way is the [live site](https://kkubesh.github.io/yes-chef/) in Chrome. If you'd rather have it as a file that works with no internet at all:
+
+1. Download `index.html` from this repo (open it, then use the download button), rename it `yes-chef.html` if you like, and put it in **My files**.
 2. Double-click it in the **Files** app. It opens in a Chrome tab.
 3. Choose where your tickets live:
    - **Create a new data file** to start fresh. Save `yes-chef-data.json` somewhere in My files.
@@ -73,15 +99,26 @@ Downloading a web page file from someone can reasonably make you pause, so here'
 
 ### Make sure you have the real file
 
-Because this is a plain file, anyone could edit a copy and pass it along. Get it from Erro directly, or from the one place it's shared. To double-check a copy, compare its fingerprint (SHA-256) with the one below. If they match, the file is exactly the one Erro released.
+Because this is a plain file, anyone could edit a copy and pass it along. Get it from this repo or the live site, not from a copy someone passed along. To double-check a copy, compare its fingerprint (SHA-256) with the one below. If they match, the file is exactly the one Erro released.
 
 <!-- checksum:start -->
-`e6e3c57e4a97b6c31e11c87e215fe2140df60f76d1186d391c999873fe1b151b`
+`e47ce43fab232ba0b5f129626735389148fafd9311fa202aa03d2c509cc5575d`
 <!-- checksum:end -->
 
 - **Mac:** open Terminal, type `shasum -a 256 ` (with a space at the end), drag the file into the window, and press Return.
-- **Windows:** in PowerShell, run `Get-FileHash yes-chef.html`
+- **Windows:** in PowerShell, run `Get-FileHash index.html` (or whatever you named the file)
 - **Chromebook:** there's no built-in tool for this, so check the copy on a Mac or PC before moving it over.
+
+## The code
+
+Everything is plain HTML, CSS and JavaScript, with no framework and no tracking.
+
+- `public/index.html`: the whole app. Every change starts here.
+- `server.js`: a tiny Node server (no dependencies) that runs the app on your own computer and saves to a `data.json` next to it. See [MAC-APP.md](MAC-APP.md) to run it.
+- `index.html`: the browser version, the page GitHub Pages serves. It's generated from `public/index.html`, so don't edit it by hand.
+- `browser-build/`: `build.py` turns `public/index.html` into the single browser file. It swaps the server storage for a file you pick, builds in the fonts and adds the security line. Run `npm install` there once (for the fonts), then `python3 build.py`, and copy the `yes-chef.html` it writes over `index.html`.
+- `tests/`: sample data files from each version, and a check that they all still open (`node tests/check-data.js`, needs Playwright).
+- `data.json`, `backups/` and `test-run/` hold your own data and are never committed (see `.gitignore`).
 
 ## Support
 
@@ -90,7 +127,7 @@ Yes, Chef is free. If it helps you focus, you can [buy me a coffee](https://buym
 ## Good to know
 
 - Your data stays on the device, in the file you picked, plus a safety copy inside Chrome.
-- Each device keeps its own data unless you set up a shared file. See **Use it on more than one device** below.
+- Each device keeps its own data unless you set up a shared file. See **Use it on more than one device** above.
 - To switch to a different data file later: **Settings → Use a different data file**.
 - Fonts and the logo are built into the file, so it looks the same offline.
 - On a school- or work-managed Chromebook, an admin can block opening local files or saving to them. If that happens, use **Just save in this browser**.

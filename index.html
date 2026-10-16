@@ -91,8 +91,11 @@ button { cursor: pointer; }
 .meter { height: 8px; border-radius: 4px; background: var(--steel-deep); overflow: hidden; margin-top: 6px; }
 .meter i { display: block; height: 100%; background: var(--order); border-radius: 4px; transition: width .4s ease; }
 .bar-actions { display: flex; gap: 8px; }
-.settings-btn { display: inline-flex; align-items: center; gap: 7px; }
-.settings-btn .gear { display: none; }
+/* Settings is always the gear icon; its name stays for screen readers and as a hover tooltip */
+.btn.settings-btn { display: inline-grid; place-items: center; padding: 9px 11px; }
+.btn.settings-btn:hover { color: var(--ink); }
+.settings-btn .gear { display: block; width: 20px; height: 20px; }
+.settings-btn .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .btn {
   border: 1.5px solid var(--ink);
@@ -213,7 +216,7 @@ button { cursor: pointer; }
 .rail-nav.go-left { left: 10px; }
 .rail-nav.go-right { right: 10px; }
 .rail-wrap.more-left .rail-nav.go-left, .rail-wrap.more-right .rail-nav.go-right { display: flex; }
-.rail-count { position: absolute; right: 24px; bottom: 4px; font-size: 13px; color: var(--ink-soft); }
+.rail-count { position: absolute; left: 24px; bottom: 4px; font-size: 13px; color: var(--ink-soft); }
 .ticket {
   /* receipts stay paper-colored in both themes, with their own ink */
   --ink: #2a2723;
@@ -464,6 +467,25 @@ button { cursor: pointer; }
 /* the open slip uses the same anatomy as a slip on the rail */
 .big-slip { --ink: #2a2723; --ink-soft: #6b655b; }
 .big-slip.is-ready { background: linear-gradient(var(--order), var(--order)) top / 100% 14px no-repeat, var(--receipt); }
+/* title with a pencil beside it; icon buttons with a small label on hover */
+#big-slip .title-row { display: flex; align-items: flex-start; gap: 6px; }
+#big-slip .title-row h2 { flex: 1; min-width: 0; }
+#big-slip .icon-btn { display: inline-grid; place-items: center; width: 40px; height: 40px; padding: 0; position: relative; flex: none; }
+#big-slip .title-row .icon-btn { margin-top: 14px; border-color: transparent; background: none; color: var(--ink-soft); }
+#big-slip .title-row .icon-btn:hover { color: var(--ink); background: rgba(42,39,35,.07); }
+#big-slip .icon-btn svg { display: block; }
+#big-slip .spike-btn { width: 46px; height: 40px; color: #2a2723; }
+#big-slip .spike-btn:hover { background: rgba(42,39,35,.07); }
+[data-tip]::after {
+  content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 6px); translate: -50% 4px;
+  background: #2a2723; color: #fbf7ea; font: 600 12px/1 var(--body); white-space: nowrap; padding: 6px 8px; border-radius: 4px;
+  opacity: 0; pointer-events: none; transition: opacity .15s ease, translate .15s ease; z-index: 5;
+}
+@media (hover: hover) { [data-tip]:hover::after, [data-tip]:focus-visible::after { opacity: 1; translate: -50% 0; } }
+#big-slip .spike-btn.confirm { width: auto; padding: 0 12px; gap: 6px; grid-auto-flow: column; background: #2a2723; color: #fbf7ea; border-color: #2a2723; }
+#big-slip .spike-btn.confirm::after { display: none; }
+#big-slip .spike-btn.confirm svg path:nth-child(2) { fill: #2a2723; } /* inverted: dark receipt, light outline */
+#big-slip .title-row [data-tip]::after { bottom: auto; top: calc(100% + 6px); translate: -50% -4px; }
 .big-slip .row { display: flex; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed rgba(42, 39, 35, .35); }
 .pick .big-slip .btn { border-color: var(--ink); color: var(--ink); background: transparent; padding: 8px 14px; font-size: 15px; white-space: nowrap; }
 .pick .big-slip .btn.solid { background: var(--ink); color: var(--receipt); }
@@ -553,7 +575,7 @@ body { padding-bottom: 100px; } /* room so the spike button never covers anythin
 }
 /* each finished slip lies flat on the spike, pierced through the middle */
 .mini {
-  --y: calc(30px + var(--i) * 6px);
+  --y: calc(28px + var(--i) * 9px);
   position: absolute; left: 50%; bottom: calc(var(--y) - 52px);
   width: 88px; height: 104px; margin-left: -44px;
   z-index: 1;
@@ -563,7 +585,7 @@ body { padding-bottom: 100px; } /* room so the spike button never covers anythin
     var(--receipt);
   -webkit-mask: var(--torn); mask: var(--torn);
   transform: rotateX(70deg) rotateZ(calc(var(--tilt) * 14)) rotateY(calc(var(--tilt) * 1.5));
-  filter: brightness(calc(.8 + var(--i) * .03)) drop-shadow(0 2px 1px rgba(0,0,0,.25));
+  filter: brightness(calc(.76 + var(--i) * .04)) drop-shadow(0 2px 1px rgba(0,0,0,.5));
   transition: transform .25s ease;
 }
 .spike-count {
@@ -612,7 +634,7 @@ body { padding-bottom: 100px; } /* room so the spike button never covers anythin
 .past-shift .nums b { font-size: 18px; }
 .spike-head-actions .btn.end-shift { border-color: var(--service-soft); color: var(--service-ink); padding: 7px 14px; }
 .spike-head-actions .btn.end-shift:hover { background: rgba(255,255,255,.07); }
-.shift-sofar { margin: -6px 0 10px; color: var(--service-soft); font-size: 14px; }
+.shift-sofar { margin: 4px 0 12px; color: var(--service-soft); font-size: 14px; }
 .shift-sofar:empty { display: none; }
 .spike-stack { overflow-y: auto; min-height: 0; padding: 18px 18px 24px; margin: 0 -18px; }
 .spiked-slip {
@@ -730,6 +752,8 @@ body { padding-bottom: 100px; } /* room so the spike button never covers anythin
 .gate-actions { display: grid; gap: 10px; margin-bottom: 14px; }
 .gate-card .btn { border-color: #2a2723; color: #2a2723; font-family: var(--print); padding: 11px 16px; }
 .gate-card .btn.go { background: var(--order); border-color: var(--order); color: var(--order-ink); font-weight: 700; }
+.gate-card .gate-code { margin: 18px 0 0; padding-top: 14px; border-top: 1.5px dashed rgba(42,39,35,.3); font-size: 13px; color: #6b655b; }
+.gate-card .gate-code a { color: #2a2723; }
 .gate-card .btn.quiet { border-color: transparent; color: #6b655b; padding: 6px 0; text-decoration: underline; text-underline-offset: 3px; }
 .gate-hint { font-size: 13px; color: #6b655b; }
 .gate-hint code { font-family: var(--print); background: rgba(42,39,35,.08); padding: 0 4px; border-radius: 3px; }
@@ -761,6 +785,8 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
   padding: 3px 10px; border-radius: 999px;
 }
 .support a:hover, .support a:focus-visible { background: color-mix(in srgb, var(--order) 85%, white); outline: none; box-shadow: 0 0 0 2px var(--ink-soft); }
+.support a.plain, .support a.plain:hover { display: inline; margin: 0; background: none; padding: 0; border-radius: 0; box-shadow: none; color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.support a.plain:focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 2px; background: none; box-shadow: none; }
 .data-io { border-top: 1px solid var(--line); margin: 14px 0 6px; padding-top: 12px; }
 .data-io .label { font-weight: 600; display: block; margin-bottom: 8px; }
 .data-io-btns { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -769,6 +795,13 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
 .import-confirm p { margin: 0 0 8px; }
 .import-confirm .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .import-confirm label { display: flex; gap: 6px; align-items: center; margin: 0 0 10px; font-size: 14px; }
+.types-list { display: grid; gap: 6px; margin: 2px 0 2px; }
+.type-row { display: flex; gap: 4px; align-items: center; }
+.type-row input, .type-add input { border: 1.5px solid var(--line); background: var(--paper); border-radius: 6px; padding: 7px 10px; flex: 1; min-width: 0; }
+.type-row .btn, .type-add .btn { padding: 6px 9px; }
+.type-row .first { font-size: 12px; color: var(--ink-soft); width: 58px; text-align: center; flex: none; }
+.type-row [data-type-up] { width: 58px; flex: none; }
+.type-add { display: flex; gap: 6px; margin-top: 6px; }
 .field-pair { display: grid; grid-template-columns: 2fr 1fr; gap: 0 12px; }
 @media (max-width: 520px) { .field-pair { grid-template-columns: 1fr; } }
 .field > span { font-size: 14px; font-weight: 600; }
@@ -903,8 +936,6 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
   /* icon-only Rewards and Settings so the header fits narrow phones */
   .bar-actions .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .rewards-btn, .settings-btn { padding: 8px 10px; }
-  .settings-btn { border: 1.5px solid var(--ink-soft); }
-  .settings-btn .gear { display: block; }
   .stats { grid-column: 1 / -1; grid-row: 2; gap: 20px; }
   .controls { padding: 4px 16px 16px; }
   .add { flex-wrap: wrap; }
@@ -934,7 +965,7 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
       <span class="label">Rewards</span>
       <span class="badge" id="rewards-badge" hidden></span>
     </button>
-    <button class="btn quiet settings-btn" id="open-settings" aria-label="Settings">
+    <button class="btn quiet settings-btn" id="open-settings" aria-label="Settings" title="Settings">
       <svg class="gear" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
       <span class="label">Settings</span>
     </button>
@@ -948,6 +979,7 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
     <div class="gate-logo" id="gate-logo"></div>
     <div id="gate-body"></div>
     <p class="gate-error" id="gate-error" role="alert"></p>
+    <p class="gate-code">Free and open source. <a href="https://github.com/KKubesh/yes-chef" target="_blank" rel="noopener noreferrer">View the code on GitHub</a></p>
   </div>
 </section>
 
@@ -957,11 +989,6 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
     <input type="text" id="add-name" placeholder="Add a slip: something you're working on or waiting on" maxlength="120">
     <label class="sr-only" for="add-type">Type</label>
     <select id="add-type">
-      <option value="task">Task</option>
-      <option value="ai">AI job</option>
-      <option value="render">Render</option>
-      <option value="delivery">Delivery</option>
-      <option value="person">Person</option>
     </select>
     <label class="sr-only" for="add-area">Area</label>
     <select id="add-area">
@@ -1060,6 +1087,11 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
       <select id="s-autoend"><option value="off">Only when I press End shift</option><option value="newday">Automatically on a new day</option></select>
       <p class="hint">Automatic files the previous shift the first time you open Yes, Chef on a new day. The day turns over at 4 AM, so late nights still count as that day.</p>
     </label>
+    <div class="field" id="s-types-field"><span>Slip types</span>
+      <div class="types-list" id="s-types"></div>
+      <div class="type-add"><input id="s-type-new" type="text" maxlength="24" placeholder="New type, like Meeting" aria-label="New slip type"><button type="button" class="btn" id="s-type-add">Add</button></div>
+      <p class="hint">Rename one and every slip using it follows. The first type is the default for new slips. Removing a type moves its slips to the first one.</p>
+    </div>
     <label class="field"><span>Theme</span>
       <select id="s-theme"><option value="auto">Match system</option><option value="light">Light</option><option value="dark">Dark</option></select>
     </label>
@@ -1076,7 +1108,7 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
     </div>
     <p class="hint" id="s-file"></p>
     <button type="button" class="btn quiet" id="s-switch" style="margin-top:10px">Use a different data file</button>
-    <p class="hint support">Yes, Chef is free and runs entirely on your device. If it helps you focus, you can <a href="https://buymeacoffee.com/kkubesh" target="_blank" rel="noopener noreferrer">buy me a coffee &#9749;</a></p>
+    <p class="hint support">Yes, Chef is free and runs entirely on your device. If it helps you focus, you can <a href="https://buymeacoffee.com/kkubesh" target="_blank" rel="noopener noreferrer">buy me a coffee &#9749;</a>. The code is open on <a class="plain" href="https://github.com/KKubesh/yes-chef" target="_blank" rel="noopener noreferrer">GitHub</a>, and feedback is welcome.</p>
     <div class="dlg-foot">
       <span></span>
       <div class="right">
@@ -1139,14 +1171,28 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
 'use strict';
 
 // ---------- data ----------
-const TYPE_LABEL = { task: 'Task', ai: 'AI job', render: 'Render', delivery: 'Delivery', person: 'Person' };
+// Slip types live in settings.types as [{ id, name }] so people can rename, add, reorder and remove them.
+// Ids never change, so a rename carries every slip with it. The first type is the default for new slips.
+// Older boards used fixed types (person, waiting, ai, render, delivery); normalize() folds those into
+// "followup", and any slip whose type no longer exists moves to the first type.
+const DEFAULT_TYPES = () => [{ id: 'task', name: 'Task' }, { id: 'followup', name: 'Follow-up' }, { id: 'errand', name: 'Errand' }];
+const OLD_TYPES = { person: 'followup', waiting: 'followup', ai: 'followup', render: 'followup', delivery: 'followup' };
+const slipTypes = () => state.settings.types;
+const typeName = (id) => (slipTypes().find(x => x.id === id) || slipTypes()[0]).name;
+const typeOr = (id) => (slipTypes().some(x => x.id === id) ? id : slipTypes()[0].id);
+function cleanTypes(list) {
+  const seen = new Set();
+  const out = (Array.isArray(list) ? list : []).filter(x => x && typeof x.id === 'string' && typeof x.name === 'string' && x.name.trim() && !seen.has(x.id) && seen.add(x.id))
+    .map(x => ({ id: x.id, name: x.name.trim().slice(0, 24) }));
+  return out.length ? out : DEFAULT_TYPES();
+}
 const SIZE_LABEL = { small: 'Small', medium: 'Medium', big: 'Big' };
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
 function defaults() {
   return {
     version: DATA_VERSION,
-    settings: { pointsPerMinute: 5, phoneCutPct: 20, check: 'phone', checkAsk: '', checkName: '', minSessionMin: 2, autoEndShift: 'off', holdMinutes: 2, burstMinutes: 15, chime: true, notify: false, theme: 'auto' },
+    settings: { pointsPerMinute: 5, phoneCutPct: 20, check: 'phone', checkAsk: '', checkName: '', types: DEFAULT_TYPES(), minSessionMin: 2, autoEndShift: 'off', holdMinutes: 2, burstMinutes: 15, chime: true, notify: false, theme: 'auto' },
     tickets: [],
     sessions: [],
     rewards: [
@@ -1192,10 +1238,14 @@ function normalize(raw) {
   const d = defaults();
   if (!raw || typeof raw !== 'object' || !raw.version) return d;
   raw = migrate(raw);
+  const settings = (({ basePoints, ...rest }) => ({ ...d.settings, ...rest }))(raw.settings || {});
+  settings.types = cleanTypes(settings.types);
+  const ids = new Set(settings.types.map(x => x.id));
+  const fixType = (type) => (ids.has(type) ? type : ids.has(OLD_TYPES[type]) ? OLD_TYPES[type] : settings.types[0].id);
   return {
     ...d, ...raw,
-    settings: (({ basePoints, ...rest }) => ({ ...d.settings, ...rest }))(raw.settings || {}),
-    tickets: withOrder(Array.isArray(raw.tickets) ? raw.tickets : []),
+    settings,
+    tickets: withOrder((Array.isArray(raw.tickets) ? raw.tickets : []).map(t => (ids.has(t.type) ? t : { ...t, type: fixType(t.type) }))),
     sessions: (Array.isArray(raw.sessions) ? raw.sessions : []).filter(x => sessionMinutes(x) > 0),
     rewards: Array.isArray(raw.rewards) ? raw.rewards : d.rewards,
     purchases: Array.isArray(raw.purchases) ? raw.purchases : [],
@@ -1552,11 +1602,11 @@ function addPractice() {
   if (hasPractice()) return;
   const now = Date.now(), o = frontOrder();
   const M = 60000;
-  const mk = (n, name, ago, extra) => ({ id: uid(), name, type: 'task', area: 'work', note: '', ready: false, holdUntil: null,
+  const mk = (n, name, ago, extra) => ({ id: uid(), name, type: slipTypes()[0].id, area: 'work', note: '', ready: false, holdUntil: null,
     createdAt: now - ago * M, doneAt: null, order: o - 10 + n, tutorial: true, ...extra });
   const start = mk(0, 'Start here: open this slip', 190, { note: 'Open a slip to start a session on it, jot where you left off, put it on hold, or spike it when it\'s done.' });
-  const sam = mk(1, 'Waiting on a reply from Sam', 150, { type: 'person', holdUntil: now + 75000, note: 'On hold. When the time runs out it comes back to the front with a chime.' });
-  const groceries = mk(2, 'Pick up groceries', 40, { area: 'personal', note: 'Work or personal. Filter the rail at the top right.' });
+  const sam = mk(1, 'Waiting on a reply from Sam', 150, { type: typeOr('followup'), practice: 'hold', holdUntil: now + 75000, note: 'On hold. When the time runs out it comes back to the front with a chime.' });
+  const groceries = mk(2, 'Pick up groceries', 40, { type: typeOr('errand'), area: 'personal', note: 'Work or personal. Filter the rail at the top right.' });
   const update = mk(3, 'Send the weekly update', 240, { doneAt: now - 12 * M, note: 'Finished, so it went on the spike.' });
   state.tickets.push(start, sam, groceries, update);
   // A little work history so the slips look like a real shift. Practice sessions show on their slips only:
@@ -1592,7 +1642,7 @@ const practiceEl = (pick) => { const t = state.tickets.find(t => t.tutorial && !
 const TOUR = [
   { target: () => practiceEl(t => !t.holdUntil && t.area === 'work') || $('#tickets .ticket'), title: 'This is your rail',
     text: 'Every slip is something in flight. The front of the line is on the left. Open a slip to start working on it.' },
-  { target: () => practiceEl(t => t.type === 'person'), title: 'Waiting on something?',
+  { target: () => practiceEl(t => t.practice === 'hold' || t.type === 'followup'), title: 'Waiting on something?',
     text: 'Put it on hold. It dims and counts down, then comes back to the front with a chime. Keep an eye on this one.' },
   { target: () => spikeBtn(), title: 'The spike', sample: true,
     text: 'When a ticket is done, spike it. Click the spike to look back at your work. When you wrap up, press End shift: it clears the board and gives you a shift report. Settings can do it for you each new day.' },
@@ -1852,7 +1902,17 @@ function slideRail(dir) {
   el.scrollBy({ left: dir * el.clientWidth * 0.8 });
 }
 
-function render() { renderStats(); renderRail(); renderSpike(); placeTour(); }
+function render() { renderTypeSelect(); renderStats(); renderRail(); renderSpike(); placeTour(); }
+// Keep the add form's type list in step with settings. Rebuilt only when the types change, so an open dropdown isn't disturbed.
+let typeKey = '';
+function renderTypeSelect() {
+  const key = JSON.stringify(slipTypes());
+  if (key === typeKey) return;
+  typeKey = key;
+  const sel = $('#add-type'), cur = sel.value;
+  sel.innerHTML = slipTypes().map(x => `<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
+  sel.value = typeOr(cur);
+}
 
 // ---------- the spike ----------
 let spikeOpen = false;
@@ -1860,6 +1920,8 @@ const spiked = () => state.tickets.filter(t => t.doneAt && !t.archivedAt).sort((
 
 // the spike's button on screen: the full spike, or the round button on phones
 const spikeBtn = () => $('#spike-fab');
+let spikeArtList = null; // set while a past shift or report is on screen
+function setSpikeArt(list) { spikeArtList = list ? list.map((t, i) => ({ id: t.id || `sample-${i}` })) : null; renderSpike(); }
 function renderSpike() {
   const fab = $('#spike-fab'), n = spiked().length;
   if (fab) {
@@ -1868,16 +1930,18 @@ function renderSpike() {
     fab.setAttribute('aria-label', n ? `The spike: ${n} finished ${n === 1 ? 'ticket' : 'tickets'}. Open to review.` : 'The spike: finished tickets land here');
   }
   const list = spiked();
-  const shown = list.slice(0, 7).reverse(); // drawn bottom-up, newest last so it sits on top
+  // The art shows what the view is about: this shift's spike, or the slips from the past shift(s) on screen.
+  const art = spikeArtList || list;
+  const shown = art.slice(0, 7).reverse(); // drawn bottom-up, newest last so it sits on top
   const btn = $('#spike');
-  btn.classList.toggle('empty', !list.length);
+  btn.classList.toggle('empty', !art.length);
   btn.setAttribute('aria-label', list.length ? `The spike: ${list.length} finished ${list.length === 1 ? 'ticket' : 'tickets'}. Open to review.` : 'The spike: finished tickets land here');
   btn.title = list.length ? `${list.length} on the spike` : 'Finished tickets land here';
   btn.innerHTML = `
     <span class="spike-base" aria-hidden="true"></span>
     <span class="spike-pin" aria-hidden="true"></span>
     ${shown.map((t, i) => `<span class="mini" aria-hidden="true" style="${slip(t.id)};--i:${i}"></span>`).join('')}
-    ${shown.length ? `<span class="spike-pin pin-top" aria-hidden="true" style="--from:${30 + (shown.length - 1) * 6}px"></span>` : ''}
+    ${shown.length ? `<span class="spike-pin pin-top" aria-hidden="true" style="--from:${28 + (shown.length - 1) * 9}px"></span>` : ''}
     ${list.length ? `<span class="spike-count">${list.length}</span>` : ''}`;
 }
 
@@ -1972,6 +2036,7 @@ function pastShiftTickets(shift) {
 function showPastShifts() {
   if (!spikeOpen) openSpike();
   const list = [...state.shifts].sort((a, b) => b.endedAt - a.endedAt);
+  setSpikeArt(list.flatMap(sh => pastShiftTickets(sh).sort((a, b) => b.doneAt - a.doneAt)));
   $('#spike-title').textContent = 'Past shifts';
   $('#spike-end').innerHTML = '';
   $('#shift-sofar').textContent = list.length ? `${list.length} ${list.length === 1 ? 'shift' : 'shifts'} on file` : '';
@@ -2004,6 +2069,7 @@ function shiftWhen(a, b) {
 function showShiftReport(shift, tickets, sample) {
   const by = shift.byTicket || tickets.map(t => ({ ticketId: t.id, name: t.name, sessions: 0, minutes: 0, points: 0, spiked: true }));
   const past = sample === 'past'; if (past) sample = null;
+  setSpikeArt(tickets);
   $('#spike-title').textContent = sample ? 'Sample shift report' : 'Shift report';
   $('#spike-end').innerHTML = '';
   $('#shift-sofar').textContent = '';
@@ -2056,6 +2122,7 @@ function showSampleReport(from) {
   showShiftReport(shift, byTicket.filter(r => r.spiked), from);
 }
 function openSpike() {
+  setSpikeArt(null);
   const list = spiked();
   const view = $('#spike-view');
   $('#spike-stack').innerHTML = list.length ? list.map((t, i) => {
@@ -2079,6 +2146,7 @@ function openSpike() {
 function closeSpike(toReview) {
   const view = $('#spike-view');
   spikeOpen = false;
+  setSpikeArt(null);
   view.classList.remove('open');
   if (toReview) { view.hidden = true; return; }
   setTimeout(() => { if (!spikeOpen) view.hidden = true; }, reducedMotion() ? 0 : 220);
@@ -2121,7 +2189,7 @@ function holdLeft(t) { return clock(Math.ceil((t.holdUntil - Date.now()) / 1000)
 function slipTag(t) {
   if (isHeld(t)) return `<span class="hold-tag" data-hold="${t.id}">Hold ${holdLeft(t)}</span>`;
   if (t.ready) return '<span class="ready-tag">Off hold</span>';
-  return esc(TYPE_LABEL[t.type] || 'Task');
+  return esc(typeName(t.type));
 }
 const holdLabel = (t) => (isHeld(t) ? 'End hold' : 'Hold');
 // Coming off hold puts a slip at the front (left) and slides the rail back to it.
@@ -2264,7 +2332,6 @@ function slipDate(ts) {
   return new Date(ts).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
-const TYPE_OPTIONS = Object.entries(TYPE_LABEL);
 
 // What a Yes was for: saved on the session, so old phone sessions still read "phone use" after you change the check.
 const slipNote = (x) => (x && x.avoided) || 'Phone use';
@@ -2284,6 +2351,17 @@ function slipHistory(t) {
     ${done.some(s => s.phone) ? `<p class="muted" style="margin:10px 0 0">* ${esc([...new Set(done.filter(s => s.phone).map(s => low(slipNote(s))))].join(', '))}</p>` : ''}`;
 }
 
+// On phones a stray tap is easy, so spiking takes two taps: the first turns the button into "Spike it?".
+const touchOnly = window.matchMedia('(hover: none)');
+const spikeNeedsConfirm = () => touchOnly.matches;
+let spikeConfirmTimer = null;
+function askSpikeConfirm(b) {
+  b.classList.add('confirm');
+  b.insertAdjacentHTML('beforeend', '<span>Spike it?</span>');
+  b.setAttribute('aria-label', 'Tap again to spike it');
+  clearTimeout(spikeConfirmTimer);
+  spikeConfirmTimer = setTimeout(() => { if (b.isConnected) { b.classList.remove('confirm'); b.querySelector('span')?.remove(); b.setAttribute('aria-label', 'Spike it'); } }, 4000);
+}
 function renderPick() {
   const t = ticketById(pickId);
   if (!t) return closePick(false);
@@ -2297,7 +2375,7 @@ function renderPick() {
       <form id="slip-form" autocomplete="off">
         <div class="top">
           <label class="sr-only" for="sf-type">Type</label>
-          <select id="sf-type" class="slip-select">${TYPE_OPTIONS.map(([k, v]) => `<option value="${k}" ${t.type === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+          <select id="sf-type" class="slip-select">${slipTypes().map(x => `<option value="${esc(x.id)}" ${t.type === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
           <span>${age(t.createdAt)} on the rail</span>
         </div>
         <label class="sr-only" for="sf-name">Name</label>
@@ -2312,16 +2390,13 @@ function renderPick() {
           <button class="btn solid" type="submit">Save</button>
           <button class="btn" type="button" data-p="cancel-edit">Cancel</button>
         </div>
-        <div class="row row-quiet">
-          <button class="btn quiet" type="button" data-p="spike">Spike it</button>
-        </div>
         <p class="muted hint">Enter saves. Esc cancels.</p>
       </form>`;
   } else if (inSession()) {
     const a = state.active;
     const running = a && a.phase === 'running';
     slip.innerHTML = `
-      <div class="top"><span>${running ? '<span class="ready-tag">On the line</span>' : esc(TYPE_LABEL[t.type] || 'Task')}</span><span>${a ? 'Started ' + new Date(a.startedAt).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }) : ''}</span></div>
+      <div class="top"><span>${running ? '<span class="ready-tag">On the line</span>' : esc(typeName(t.type))}</span><span>${a ? 'Started ' + new Date(a.startedAt).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }) : ''}</span></div>
       <h2 id="pick-title">${esc(t.name)}</h2>
       <label class="sr-only" for="sf-live-note">Note</label>
       <textarea id="sf-live-note" class="slip-field slip-note live-note" rows="2" placeholder="Jot where you are, so you can pick it right back up">${esc(t.note || '')}</textarea>
@@ -2338,21 +2413,23 @@ function renderPick() {
       <h2 id="pick-title">${esc(t.name)}</h2>
       ${t.note ? `<p class="note">${esc(t.note)}</p>` : ''}
       <span class="area ${t.area}">${t.area === 'personal' ? 'Personal' : 'Work'}</span>
-      <div class="row"><span class="muted">${esc(TYPE_LABEL[t.type] || 'Task')}, on the rail for ${spanText(t.createdAt, t.doneAt)}</span></div>
+      <div class="row"><span class="muted">${esc(typeName(t.type))}, on the rail for ${spanText(t.createdAt, t.doneAt)}</span></div>
       <div class="history">${slipHistory(t)}</div>
       <p class="foot">Added ${slipDate(t.createdAt)}</p>`;
   } else {
     slip.innerHTML = `
       <div class="top"><span>${slipTag(t)}</span><span>${age(t.createdAt)} on the rail</span></div>
-      <h2 id="pick-title" class="tap" data-p="edit-name" title="Click to edit">${esc(t.name)}</h2>
+      <div class="title-row">
+        <h2 id="pick-title" class="tap" data-p="edit-name" title="Click to edit">${esc(t.name)}</h2>
+        <button class="btn icon-btn" type="button" data-p="edit" aria-label="Edit slip" data-tip="Edit"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>
+      </div>
       ${t.note
         ? `<p class="note tap" data-p="edit-note" title="Click to edit">${esc(t.note)}</p>`
         : `<p class="note add-note tap" data-p="edit-note">Add a note</p>`}
       <span class="area ${t.area}">${t.area === 'personal' ? 'Personal' : 'Work'}</span>
       <div class="row">
         <button class="btn" data-p="hold">${holdLabel(t)}</button>
-        <button class="btn" data-p="spike">Spike it</button>
-        <button class="btn quiet" data-p="edit">Edit</button>
+        <button class="btn icon-btn spike-btn" data-p="spike" aria-label="Spike it" data-tip="Spike it"><svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 14.6V25.5" stroke-width="2.2"/><path d="M9 11.2 22.8 9.6 24 19.3l-1.85 1.05-1.85-.95-1.85 1.05-1.85-.95-1.85 1.05-1.85-.95-1.85 1.05-1.85-.95z" fill="var(--receipt)" stroke-width="1.6"/><path d="M11.6 14.4l2.8-.32M18.2 13.65l3-.34M12.3 17.2l6.8-.75" stroke-width="1.1" opacity=".55"/><path d="M16 3.5V14.6" stroke-width="2.2"/><ellipse cx="16" cy="27" rx="8.5" ry="2.4" fill="currentColor" stroke="none" opacity=".85"/></svg></button>
       </div>
       <div class="history">${slipHistory(t)}</div>
       <p class="foot">Added ${slipDate(t.createdAt)}</p>`;
@@ -2723,7 +2800,7 @@ function wire() {
     if (!name) { $('#add-name').focus(); return; }
     addTicket(name, $('#add-type').value, $('#add-area').value);
     $('#add-name').value = '';
-    $('#add-type').value = 'task';
+    $('#add-type').value = slipTypes()[0].id;
     $('#add-name').focus();
   });
 
@@ -2878,7 +2955,11 @@ function wire() {
     if (p === 'edit' || p === 'edit-name') return enterEdit('name');
     if (p === 'edit-note') return enterEdit('note');
     if (p === 'cancel-edit') return cancelEdit();
-    if (p === 'spike') { const id = pickId; closePick(false); return spikeTicket(id); }
+    if (p === 'spike') {
+      const b = e.target.closest('[data-p]');
+      if (spikeNeedsConfirm() && !b.classList.contains('confirm')) return askSpikeConfirm(b);
+      const id = pickId; closePick(false); return spikeTicket(id);
+    }
     if (p === 'unspike') { const id = pickId; closePick(false); return unspike(id); }
     if (p === 'to-spike') { closePick(false); return openSpike(); }
   });
@@ -2970,7 +3051,7 @@ function wire() {
     $('#s-rate').value = s.pointsPerMinute; $('#s-hold').value = s.holdMinutes; $('#s-cut').value = s.phoneCutPct; $('#s-burst').value = s.burstMinutes;
     $('#s-chime').checked = !!s.chime; $('#s-notify').checked = !!s.notify; $('#s-theme').value = s.theme || 'auto';
     $('#s-min').value = minSession(); syncHiddenRow(); $('#s-autoend').value = s.autoEndShift || 'off'; $('#s-check').value = s.check || 'phone'; $('#s-ask').value = s.checkAsk || ''; $('#s-name').value = s.checkName || '';
-    syncCheckFields();
+    syncCheckFields(); renderTypesEdit(); $('#s-type-new').value = '';
     $('#settings-dlg').returnValue = '';
     $('#settings-dlg').showModal();
   });
@@ -3015,7 +3096,65 @@ function wire() {
     syncHiddenRow();
     autoEndShift();
   }
-  $('#settings-form').addEventListener('change', (e) => { if (!e.target.closest('.data-io')) applySettings(); });
+  $('#settings-form').addEventListener('change', (e) => {
+    if (e.target.dataset.type) return renameType(e.target);
+    if (!e.target.closest('.data-io') && !e.target.closest('#s-types-field')) applySettings();
+  });
+  // ---- slip types editor ----
+  function renderTypesEdit() {
+    const list = slipTypes();
+    $('#s-types').innerHTML = list.map((x, i) => `<div class="type-row">
+      <input type="text" data-type="${esc(x.id)}" maxlength="24" value="${esc(x.name)}" aria-label="Slip type name">
+      ${i === 0 ? '<span class="first">Default</span>' : `<button type="button" class="btn quiet" data-type-up="${esc(x.id)}" aria-label="Move ${esc(x.name)} up" title="Move up">&uarr;</button>`}
+      ${list.length > 1 ? `<button type="button" class="btn quiet" data-type-del="${esc(x.id)}" aria-label="Remove ${esc(x.name)}" title="Remove">&times;</button>` : ''}
+    </div>`).join('');
+  }
+  const typeTaken = (name, except) => slipTypes().some(x => x.id !== except && x.name.toLowerCase() === name.toLowerCase());
+  function renameType(input) {
+    const x = slipTypes().find(y => y.id === input.dataset.type); if (!x) return;
+    const name = input.value.trim().slice(0, 24);
+    if (name && !typeTaken(name, x.id)) x.name = name;
+    input.value = x.name;
+    save(); render();
+  }
+  function addType() {
+    const name = $('#s-type-new').value.trim().slice(0, 24);
+    if (!name) return $('#s-type-new').focus();
+    if (typeTaken(name)) { toast(`There's already a ${name} type.`, null, 4000); return; }
+    slipTypes().push({ id: 'type-' + uid(), name });
+    $('#s-type-new').value = '';
+    save(); render(); renderTypesEdit(); $('#s-type-new').focus();
+  }
+  $('#s-type-add').addEventListener('click', addType);
+  $('#s-types-field').addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+    e.preventDefault(); // Enter adds or renames here instead of closing Settings
+    if (e.target.id === 's-type-new') addType(); else e.target.blur();
+  });
+  $('#s-types').addEventListener('click', (e) => {
+    const up = e.target.closest('[data-type-up]'), del = e.target.closest('[data-type-del]');
+    const list = slipTypes();
+    if (up) {
+      const i = list.findIndex(x => x.id === up.dataset.typeUp); if (i < 1) return;
+      [list[i - 1], list[i]] = [list[i], list[i - 1]];
+      save(); render(); renderTypesEdit();
+      $(`#s-types [data-type="${CSS.escape(list[i - 1].id)}"]`)?.focus();
+    }
+    if (del && list.length > 1) {
+      const before = list.map(x => ({ ...x }));
+      const i = list.findIndex(x => x.id === del.dataset.typeDel); if (i < 0) return;
+      const [gone] = list.splice(i, 1);
+      const moved = state.tickets.filter(t => t.type === gone.id);
+      moved.forEach(t => { t.type = list[0].id; });
+      save(); render(); renderTypesEdit();
+      const note = moved.length ? ` ${moved.length} ${moved.length === 1 ? 'slip' : 'slips'} moved to ${list[0].name}.` : '';
+      toast(`Removed ${gone.name}.${note}`, () => {
+        state.settings.types = before;
+        moved.forEach(t => { t.type = gone.id; });
+        save(); render(); if ($('#settings-dlg').open) renderTypesEdit();
+      }, 8000);
+    }
+  });
   $('#s-close').addEventListener('click', () => $('#settings-dlg').close('done'));
   $('#settings-dlg').addEventListener('close', () => {
     if ($('#settings-dlg').returnValue === 'import') return; // an import replaced the board; the form shows the old settings

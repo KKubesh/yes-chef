@@ -1,0 +1,12 @@
+# Your own data never goes in the repo
+data.json
+data*.json
+backups/
+test-run/
+*.yes-chef-backup.json
+
+# Build bits and system files
+node_modules/
+browser-build/source.html
+browser-build/yes-chef.html
+.DS_Store

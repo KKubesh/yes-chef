@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "settings": {
+    "pointsPerMinute": 5,
+    "basePoints": 10,
+    "phoneCutPct": 20,
+    "burstMinutes": 15,
+    "chime": true,
+    "notify": false,
+    "theme": "auto"
+  },
+  "tickets": [
+    {
+      "id": "e1",
+      "name": "Old ticket",
+      "type": "task",
+      "area": "work",
+      "note": "from the first build",
+      "ready": true,
+      "createdAt": 1791685428670,
+      "doneAt": null
+    },
+    {
+      "id": "e2",
+      "name": "Old finished",
+      "type": "ai",
+      "area": "personal",
+      "note": "",
+      "ready": false,
+      "createdAt": 1791692628670,
+      "doneAt": 1791728628670
+    }
+  ],
+  "sessions": [
+    {
+      "id": "es1",
+      "ticketId": "e1",
+      "ticketName": "Old ticket",
+      "area": "work",
+      "mode": "burst",
+      "startedAt": 1791764628670,
+      "endedAt": 1791766128670,
+      "durationSec": 1500,
+      "phone": false,
+      "points": 125
+    },
+    {
+      "id": "es2",
+      "ticketId": "e1",
+      "ticketName": "Old ticket",
+      "area": "work",
+      "mode": "open",
+      "startedAt": 1791768228670,
+      "endedAt": 1791770628670,
+      "durationSec": 2400,
+      "phone": true,
+      "points": 160,
+      "cutPct": 20
+    }
+  ],
+  "rewards": [
+    {
+      "id": "r1",
+      "name": "Coffee",
+      "price": 500,
+      "size": "medium"
+    }
+  ],
+  "purchases": [
+    {
+      "id": "p1",
+      "rewardId": "r1",
+      "name": "Coffee",
+      "price": 500,
+      "at": 1791800628670
+    }
+  ],
+  "active": null,
+  "_expect": {
+    "points": 285,
+    "note": "points shown after loading; every ticket and session id must survive a save"
+  }
+}

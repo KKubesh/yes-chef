@@ -1,0 +1,3072 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yes, Chef</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='5' width='28' height='5' rx='2' fill='%2369747d'/%3E%3Crect x='7' y='9' width='18' height='19' fill='%23f5c518'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --steel: #d6dbdf;
+  --steel-deep: #b9c0c6;
+  --rail-hi: #f2f4f5;
+  --rail-lo: #7d878f;
+  --paper: #ffffff;
+  --receipt: #fbf7ea;
+  --ink: #1b2024;
+  --ink-soft: #59636b;
+  --line: #c9cfd4;
+  --order: #f5c518;
+  --order-ink: #3a2e00;
+  --work: #2d5ba3;
+  --personal: #2c7650;
+  --phone: #c2412d;
+  --service: #15191c;
+  --service-ink: #eef1f3;
+  --service-soft: #8e999f;
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --print: "Courier Prime", "Courier New", Courier, monospace;
+  /* torn paper: teeth along the top and bottom edges */
+  --tooth: 12px;
+  --torn:
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / var(--tooth) calc(var(--tooth) / 2) repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / var(--tooth) calc(var(--tooth) / 2) repeat-x,
+    linear-gradient(#000 0 0) center / 100% calc(100% - var(--tooth) + 1px) no-repeat;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --steel: #22282c; --steel-deep: #2d3439; --rail-hi: #8b959c; --rail-lo: #3b4348;
+    --paper: #30373c; --receipt: #e3ddcd; --ink: #e9edf0; --ink-soft: #a3adb4; --line: #444d53;
+    --work: #7ea6e6; --personal: #6fc296; --phone: #f07a66;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --steel: #22282c; --steel-deep: #2d3439; --rail-hi: #8b959c; --rail-lo: #3b4348;
+  --paper: #30373c; --receipt: #e3ddcd; --ink: #e9edf0; --ink-soft: #a3adb4; --line: #444d53;
+  --work: #7ea6e6; --personal: #6fc296; --phone: #f07a66;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--steel);
+  color: var(--ink);
+  font: 400 16px/1.45 var(--body);
+  min-height: 100vh;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--work); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- top bar ---------- */
+.bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 24px;
+  align-items: center;
+  padding: 16px 24px;
+}
+.wordmark { margin: 0; line-height: 0; }
+.wordmark .logo { height: 54px; width: auto; color: var(--ink); display: block; margin: -4px 0 -6px; }
+.stats { display: flex; gap: 28px; align-items: flex-end; flex-wrap: wrap; }
+.stat b { display: block; font: 600 26px/1 var(--display); }
+.stat span { font-size: 13px; color: var(--ink-soft); }
+.next { min-width: 220px; }
+.meter { height: 8px; border-radius: 4px; background: var(--steel-deep); overflow: hidden; margin-top: 6px; }
+.meter i { display: block; height: 100%; background: var(--order); border-radius: 4px; transition: width .4s ease; }
+.bar-actions { display: flex; gap: 8px; }
+/* Settings is always the gear icon; its name stays for screen readers and as a hover tooltip */
+.btn.settings-btn { display: inline-grid; place-items: center; padding: 9px 11px; }
+.btn.settings-btn:hover { color: var(--ink); }
+.settings-btn .gear { display: block; width: 20px; height: 20px; }
+.settings-btn .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.btn {
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-weight: 600;
+}
+.btn:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.btn.solid { background: var(--ink); color: var(--steel); }
+.btn.solid:hover { background: color-mix(in srgb, var(--ink) 85%, var(--steel)); }
+.btn.quiet { border-color: transparent; color: var(--ink-soft); }
+.btn.danger { border-color: var(--phone); color: var(--phone); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.rewards-btn { display: inline-flex; align-items: center; gap: 7px; position: relative; }
+.rewards-btn .badge {
+  min-width: 20px; height: 20px; padding: 0 6px;
+  border-radius: 10px;
+  background: var(--order); color: var(--order-ink);
+  font: 700 12px/20px var(--body); text-align: center;
+}
+.rewards-btn .badge[hidden] { display: none; }
+
+.banner {
+  margin: 0 24px 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: var(--order);
+  color: var(--order-ink);
+  font-weight: 500;
+}
+
+/* ---------- add + filter ---------- */
+.controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 4px 24px 18px;
+}
+.add { display: flex; gap: 8px; flex: 1 1 520px; max-width: 760px; }
+/* the add box stays a single line until you use it; type, area and Add show while you're adding */
+.add:not(.open) select, .add:not(.open) button { display: none; }
+.add.open select, .add.open button { animation: add-in .18s ease both; }
+@keyframes add-in { from { opacity: 0; translate: 0 -4px; } }
+@media (prefers-reduced-motion: reduce) { .add.open select, .add.open button { animation: none; } }
+.add input[type=text] {
+  flex: 1;
+  min-width: 0;
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+  border-radius: 6px;
+  padding: 9px 12px;
+}
+.add select, .field select {
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+  border-radius: 6px;
+  padding: 8px 8px;
+}
+.seg { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 8px 14px; font-weight: 600; }
+.seg button + button { border-left: 1.5px solid var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--steel); }
+
+/* ---------- the rail ---------- */
+.rail-wrap { position: relative; padding: 0 0 28px; }
+.rail-bar {
+  position: relative;
+  height: 18px;
+  margin: 0;
+  border-radius: 0;   /* runs off both edges, like a rail bolted wall to wall */
+  background: linear-gradient(to bottom, var(--rail-hi), var(--rail-lo) 70%, var(--rail-hi));
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,.18);
+  z-index: 2;
+}
+.tickets {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 18px 24px 18px;   /* room for the clips and tilted corners */
+  margin-top: -18px;
+  scroll-snap-type: x proximity;
+  scroll-padding: 0 24px;
+  scroll-behavior: smooth;
+  min-height: 120px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--steel-deep) transparent;
+}
+.tickets::-webkit-scrollbar { height: 8px; }
+.tickets::-webkit-scrollbar-thumb { background: var(--steel-deep); border-radius: 4px; }
+/* shade the ends of the rail when there are slips out of view */
+.rail-wrap::before, .rail-wrap::after {
+  content: "";
+  position: absolute; top: 18px; bottom: 28px;
+  width: 56px;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+.rail-wrap::before { left: 0; background: linear-gradient(to right, var(--steel), transparent); }
+.rail-wrap::after { right: 0; background: linear-gradient(to left, var(--steel), transparent); }
+.rail-wrap.more-left::before, .rail-wrap.more-right::after { opacity: 1; }
+.rail-nav {
+  position: absolute; top: 110px; z-index: 4;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--ink); color: var(--steel);
+  font: 700 24px/1 var(--body);
+  display: none; align-items: center; justify-content: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+.rail-nav.go-left { left: 10px; }
+.rail-nav.go-right { right: 10px; }
+.rail-wrap.more-left .rail-nav.go-left, .rail-wrap.more-right .rail-nav.go-right { display: flex; }
+.rail-count { position: absolute; left: 24px; bottom: 4px; font-size: 13px; color: var(--ink-soft); }
+.ticket {
+  /* receipts stay paper-colored in both themes, with their own ink */
+  --ink: #2a2723;
+  --ink-soft: #6b655b;
+  --work: #2d5ba3;
+  --personal: #2c7650;
+  position: relative;
+  flex: 0 0 236px;
+  scroll-snap-align: start;
+  isolation: isolate;
+  background: none;
+  color: var(--ink);
+  font-family: var(--print);
+  padding: 22px 16px calc(26px + var(--extra, 0px));
+  margin-top: var(--drop, 0px);
+  transform-origin: 50% 0;
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform .25s ease;
+  cursor: pointer;
+  border: 0;
+  text-align: left;
+}
+.ticket::before { /* the clip on the rail */
+  content: "";
+  position: absolute;
+  top: -16px; left: 50%;
+  width: 44px; height: 26px;
+  margin-left: -22px;
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(to bottom, var(--rail-hi), var(--rail-lo));
+}
+.ticket::after { /* the paper itself, torn at top and bottom */
+  content: "";
+  position: absolute; inset: 0;
+  z-index: -1;
+  background: var(--receipt);
+  -webkit-mask: var(--torn);
+  mask: var(--torn);
+}
+.ticket.is-ready::after {
+  background: linear-gradient(var(--order), var(--order)) top / 100% 12px no-repeat, var(--receipt);
+}
+.ticket:hover { --tilt: 0deg !important; }
+.ticket[draggable="true"] { cursor: grab; }
+.ticket.dragging { opacity: .45; }
+.ticket.drop-before { box-shadow: -6px 0 0 -2px var(--order); }
+.ticket.drop-after { box-shadow: 6px 0 0 -2px var(--order); }
+.ticket .top { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-soft); }
+.hold-tag {
+  display: inline-block;
+  border: 1.5px dashed currentColor;
+  color: var(--ink-soft);
+  font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums;
+  padding: 0 7px; border-radius: 3px;
+}
+.ticket.is-held::after { background: color-mix(in srgb, var(--receipt) 82%, var(--steel)); }
+.ticket.is-held h3, .ticket.is-held .note { opacity: .62; }
+.ticket .ready-tag {
+  display: inline-block;
+  background: var(--order); color: var(--order-ink);
+  font-weight: 600; font-size: 13px;
+  padding: 1px 8px; border-radius: 3px;
+}
+.ticket h3 {
+  font: 700 21px/1.15 var(--print);
+  margin: 10px 0 8px;
+  overflow-wrap: anywhere;
+}
+.ticket .note { font-size: 14px; color: var(--ink-soft); margin: 0 0 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ticket .area { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
+.ticket .area::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.area.work { color: var(--work); }
+.area.personal { color: var(--personal); }
+.ticket .row { display: flex; gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 1.5px dashed color-mix(in srgb, var(--ink-soft) 45%, transparent); }
+.ticket .btn.solid { color: var(--receipt); }
+.ticket .btn:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.ticket .btn.solid:hover { background: color-mix(in srgb, var(--ink) 85%, var(--receipt)); }
+.ticket .row .btn { padding: 6px 8px; font-size: 13px; white-space: nowrap; }
+.ticket .row .btn.solid { flex: 1; }
+
+.empty {
+  margin: 28px 24px 0;
+  max-width: 520px;
+  color: var(--ink-soft);
+}
+.empty b { display: block; font: 600 24px/1.1 var(--display); color: var(--ink); margin-bottom: 6px; }
+
+.today {
+  display: flex; gap: 28px; flex-wrap: wrap;
+  padding: 6px 24px 32px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+.today strong { color: var(--ink); }
+.today { align-items: baseline; row-gap: 6px; }
+.today:empty { display: none; }
+@media (max-width: 360px) { .stats { gap: 14px !important; } .stat span { font-size: 12px; } .stat b { font-size: 23px; } }
+.stat-today { background: none; border: 0; padding: 0; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+.stat-today:hover span, .stat-today:focus-visible span { text-decoration: underline dotted; text-underline-offset: 3px; }
+
+/* ---------- focus (service) screen ---------- */
+.focus {
+  position: fixed; inset: 0;
+  z-index: 50;
+  background: var(--service);
+  color: var(--service-ink);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 24px clamp(16px, 5vw, 64px);
+  --ink: var(--service-ink); --steel: var(--service);
+}
+.focus[hidden] { display: none; }
+.focus .crumb { color: var(--service-soft); font-size: 15px; display: flex; justify-content: space-between; gap: 12px; }
+.focus .stage { align-self: center; max-width: 1100px; width: 100%; margin: 0 auto; }
+.focus .task {
+  font: 700 clamp(40px, 7vw, 96px)/1 var(--display);
+  margin: 0 0 24px;
+  overflow-wrap: anywhere;
+}
+.focus .clock {
+  font: 600 clamp(72px, 16vw, 220px)/0.9 var(--display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+}
+.focus .clock.done { color: var(--order); }
+.focus .sub { color: var(--service-soft); font-size: 18px; margin: 0 0 28px; }
+.focus .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.focus .btn { border-color: var(--service-ink); padding: 12px 20px; font-size: 17px; }
+.focus .btn.solid { background: var(--service-ink); color: var(--service); }
+.focus .btn.go { background: var(--order); border-color: var(--order); color: var(--order-ink); }
+.focus .btn.quiet { color: var(--service-soft); border-color: transparent; }
+.lengths { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 24px; }
+.lengths button {
+  border: 1.5px solid var(--service-soft); background: transparent; color: var(--service-ink);
+  border-radius: 6px; padding: 10px 16px; font: 600 22px/1 var(--display);
+}
+.lengths button[aria-pressed="true"] { background: var(--service-ink); color: var(--service); border-color: var(--service-ink); }
+.lengths input {
+  width: 84px; border: 1.5px solid var(--service-soft); background: transparent; color: var(--service-ink);
+  border-radius: 6px; padding: 8px 10px; font: 600 22px/1 var(--display);
+}
+.ask { font: 700 clamp(40px, 6vw, 80px)/1 var(--display); margin: 0 0 28px; }
+.answer { display: grid; grid-template-columns: repeat(2, minmax(0, 260px)); gap: 16px; }
+.answer button {
+  border-radius: 10px; padding: 26px 20px; font: 700 40px/1 var(--display);
+  border: 2px solid var(--service-ink); background: transparent; color: var(--service-ink);
+}
+.answer .no { background: var(--order); color: var(--order-ink); border-color: var(--order); }
+.answer .yes:hover { border-color: var(--phone); color: var(--phone); }
+.worked { display: inline-flex; gap: 12px; align-items: center; color: var(--service-soft); font-size: 16px; margin-top: 4px; }
+.worked input {
+  width: 92px; border: 1.5px solid var(--service-soft); background: transparent; color: var(--service-ink);
+  border-radius: 6px; padding: 6px 10px; font: 600 22px/1 var(--display);
+}
+.earned { font: 700 clamp(80px, 14vw, 180px)/0.9 var(--display); margin: 0 0 12px; color: var(--order); font-variant-numeric: tabular-nums; }
+.earned.cut { color: var(--service-ink); }
+.focus .meter { background: #2b3237; max-width: 520px; height: 10px; margin: 18px 0 28px; }
+
+/* ---------- ticket lifted off the rail ---------- */
+.pick {
+  position: fixed; inset: 0; z-index: 40;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  column-gap: clamp(28px, 5vw, 88px);
+  padding: 4vh clamp(16px, 5vw, 72px);
+}
+.pick[hidden] { display: none; }
+.pick-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(10, 12, 14, .88);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+.pick.open .pick-backdrop { opacity: 1; }
+.slip-hold {
+  position: relative;
+  justify-self: end;
+  height: 75vh;
+  width: min(48vh, 100%);
+  filter: drop-shadow(0 30px 38px rgba(0, 0, 0, .5));
+  will-change: transform;
+}
+.big-slip {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  background: var(--receipt);
+  color: #2a2723;
+  font-family: var(--print);
+  font-size: 15px;
+  padding: 34px 28px 40px;
+  overflow: hidden;
+  -webkit-mask: var(--torn);
+  mask: var(--torn);
+}
+.big-slip .top { display: flex; justify-content: space-between; color: #6b655b; font-size: 14px; }
+.big-slip .ready-tag { background: var(--order); color: var(--order-ink); font-weight: 700; padding: 1px 8px; border-radius: 3px; }
+.big-slip h2 { font: 700 clamp(24px, 3.7vh, 40px)/1.12 var(--print); margin: 18px 0 10px; overflow-wrap: anywhere; }
+.big-slip .area { display: inline-flex; align-items: center; gap: 7px; font-weight: 700; font-size: 14px; }
+.big-slip .area::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.big-slip .area.work { color: #2d5ba3; }
+.big-slip .area.personal { color: #2c7650; }
+.big-slip .note { margin: 14px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.big-slip hr { border: 0; border-top: 1.5px dashed rgba(42, 39, 35, .35); margin: 18px 0 12px; width: 100%; }
+.big-slip .lines { display: grid; grid-template-columns: 1fr auto auto; gap: 4px 14px; font-size: 14px; }
+.big-slip .lines .num { text-align: right; font-variant-numeric: tabular-nums; }
+.big-slip .lines .phone { color: #9a3a2a; }
+.big-slip .total { font-weight: 700; font-size: 15px; }
+.big-slip .muted { color: #6b655b; font-size: 14px; }
+.big-slip .foot { margin-top: auto; padding-top: 14px; color: #6b655b; font-size: 13px; text-align: center; }
+.pick-panel {
+  justify-self: start;
+  max-width: 470px;
+  color: var(--service-ink);
+  opacity: 0; translate: 16px 0;
+  transition: opacity .35s ease .25s, translate .35s ease .25s;
+}
+.pick.open .pick-panel { opacity: 1; translate: 0 0; }
+.pick-panel h2 { font: 700 clamp(36px, 4.4vw, 56px)/1 var(--display); margin: 0 0 20px; }
+.pick-panel .sub { color: var(--service-soft); font-size: 17px; margin: 0 0 24px; }
+.pick-panel .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.pick-panel .more { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 22px; }
+.pick .btn { border-color: var(--service-ink); color: var(--service-ink); padding: 12px 20px; font-size: 17px; }
+.pick .btn.go { background: var(--order); border-color: var(--order); color: var(--order-ink); padding: 14px 26px; font-size: 19px; }
+.pick .btn.quiet { border-color: transparent; color: var(--service-soft); padding: 8px 10px; font-size: 15px; }
+.pick .btn.quiet:hover { color: var(--service-ink); background: rgba(255,255,255,.06); }
+.ticket.lifted { visibility: hidden; }
+@media (max-width: 760px) {
+  .pick { grid-template-columns: 1fr; grid-template-rows: auto auto; align-content: center; row-gap: 22px; overflow-y: auto; }
+  .pick { padding-top: 32px; padding-bottom: 32px; }
+  /* phones: the slip shows at its full height (no cropping) and the whole view scrolls, panel below */
+  .pick { align-content: start; }
+  .slip-hold { justify-self: center; height: auto; width: min(100%, 420px); }
+  .big-slip { position: relative; inset: auto; min-height: 0; padding: 28px 22px 34px; }
+  .big-slip h2 { font-size: 24px; }
+  .pick-panel { justify-self: stretch; }
+}
+@media (pointer: coarse) {
+  .rail-nav { display: none !important; } /* swipe instead on touch screens */
+}
+@media (prefers-reduced-motion: reduce) {
+  .pick-panel { translate: 0 0; }
+}
+
+/* the open slip uses the same anatomy as a slip on the rail */
+.big-slip { --ink: #2a2723; --ink-soft: #6b655b; }
+.big-slip.is-ready { background: linear-gradient(var(--order), var(--order)) top / 100% 14px no-repeat, var(--receipt); }
+/* title with a pencil beside it; icon buttons with a small label on hover */
+#big-slip .title-row { display: flex; align-items: flex-start; gap: 6px; }
+#big-slip .title-row h2 { flex: 1; min-width: 0; }
+#big-slip .icon-btn { display: inline-grid; place-items: center; width: 40px; height: 40px; padding: 0; position: relative; flex: none; }
+#big-slip .title-row .icon-btn { margin-top: 14px; border-color: transparent; background: none; color: var(--ink-soft); }
+#big-slip .title-row .icon-btn:hover { color: var(--ink); background: rgba(42,39,35,.07); }
+#big-slip .icon-btn svg { display: block; }
+#big-slip .spike-btn { width: 46px; height: 40px; color: #2a2723; }
+#big-slip .spike-btn:hover { background: rgba(42,39,35,.07); }
+[data-tip]::after {
+  content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 6px); translate: -50% 4px;
+  background: #2a2723; color: #fbf7ea; font: 600 12px/1 var(--body); white-space: nowrap; padding: 6px 8px; border-radius: 4px;
+  opacity: 0; pointer-events: none; transition: opacity .15s ease, translate .15s ease; z-index: 5;
+}
+@media (hover: hover) { [data-tip]:hover::after, [data-tip]:focus-visible::after { opacity: 1; translate: -50% 0; } }
+#big-slip .spike-btn.confirm { width: auto; padding: 0 12px; gap: 6px; grid-auto-flow: column; background: #2a2723; color: #fbf7ea; border-color: #2a2723; }
+#big-slip .spike-btn.confirm::after { display: none; }
+#big-slip .spike-btn.confirm svg path:nth-child(2) { fill: #2a2723; } /* inverted: dark receipt, light outline */
+#big-slip .title-row [data-tip]::after { bottom: auto; top: calc(100% + 6px); translate: -50% -4px; }
+.big-slip .row { display: flex; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed rgba(42, 39, 35, .35); }
+.pick .big-slip .btn { border-color: var(--ink); color: var(--ink); background: transparent; padding: 8px 14px; font-size: 15px; white-space: nowrap; }
+.pick .big-slip .btn.solid { background: var(--ink); color: var(--receipt); }
+.pick .big-slip .btn.quiet { border-color: transparent; color: var(--ink-soft); padding: 8px 12px; }
+.pick .big-slip .btn.danger { color: #9a3a2a; }
+.big-slip .note { margin: 14px 0 12px !important; }
+.big-slip .area { margin-top: 2px; }
+.big-slip .btn.solid { color: var(--receipt); }
+.big-slip .btn:hover { background: rgba(42, 39, 35, .08); }
+.big-slip .btn.solid:hover { background: #3d3934; }
+.big-slip .btn.quiet { color: var(--ink-soft); border-color: transparent; }
+.big-slip .btn.danger { color: #9a3a2a; }
+.big-slip .row-quiet { border-top: 0; margin-top: 4px; padding-top: 0; }
+.big-slip .history { margin-top: 18px; }
+.big-slip .history > .lines:first-child, .big-slip .history > .muted:first-child { padding-top: 0; }
+.big-slip .tap { cursor: text; border-radius: 3px; }
+.big-slip .tap:hover { background: rgba(42, 39, 35, .06); box-shadow: 0 0 0 4px rgba(42, 39, 35, .06); }
+.big-slip .add-note { color: var(--ink-soft); }
+.big-slip .add-note::before { content: "+ "; }
+.big-slip form { display: flex; flex-direction: column; min-height: 100%; }
+.slip-field {
+  font-family: var(--print); color: var(--ink); overflow: hidden;
+  background: transparent; border: 0; border-bottom: 1.5px dashed rgba(42, 39, 35, .45);
+  border-radius: 0; padding: 4px 2px; resize: none; width: 100%;
+}
+.slip-field:focus { outline: none; border-bottom: 2px solid var(--ink); background: rgba(42, 39, 35, .05); }
+.slip-name { font: 700 clamp(22px, 3.4vh, 36px)/1.15 var(--print); margin: 16px 0 12px; }
+.slip-note { font-size: 15px; line-height: 1.45; margin-bottom: 14px; }
+.slip-select {
+  font-family: var(--print); font-size: 14px; color: var(--ink-soft);
+  background: transparent; border: 1.5px dashed rgba(42, 39, 35, .45); border-radius: 4px; padding: 2px 6px;
+}
+.slip-area { display: flex; gap: 18px; margin-bottom: 10px; }
+.slip-area label { cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+.slip-area input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.slip-area label:has(input:not(:checked)) { color: var(--ink-soft) !important; opacity: .55; }
+.slip-area label:has(input:focus-visible) { outline: 3px solid var(--work); outline-offset: 3px; border-radius: 3px; }
+.slip-check { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+.slip-check input { width: 17px; height: 17px; accent-color: var(--ink); }
+.big-slip .hint { margin: auto 0 0; padding-top: 16px; font-size: 13px; text-align: center; }
+.pick.editing .pick-panel { opacity: .28; transition: opacity .2s ease; }
+/* the panel speaks the same printed language as the slip */
+.pick-panel h2 { font-family: var(--print); font-weight: 700; letter-spacing: -0.01em; }
+.pick-panel .lengths button, .pick-panel .lengths input { font-family: var(--print); font-weight: 700; font-size: 19px; }
+
+/* ---------- the spike (finished tickets) ---------- */
+.spike-fab {
+  display: grid; place-items: center;
+  position: fixed; right: 24px; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: 30;
+  width: 58px; height: 58px; border-radius: 50%;
+  background: var(--steel); color: var(--ink);
+  border: 1.5px solid var(--ink-soft);
+  box-shadow: 0 6px 16px rgba(0,0,0,.22);
+  cursor: pointer; padding: 0;
+}
+.spike-fab:active { scale: .96; }
+.spike-fab:hover { border-color: var(--ink); }
+body { padding-bottom: 100px; } /* room so the spike button never covers anything */
+.spike-fab .badge {
+  position: absolute; top: -4px; right: -4px;
+  min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px;
+  background: var(--order); color: var(--order-ink);
+  font: 700 12px/22px var(--body); text-align: center;
+  box-shadow: 0 0 0 2px var(--steel);
+}
+.spike-fab .badge[hidden] { display: none; }
+.spike {
+  position: fixed; right: 28px; bottom: 26px; z-index: 30;
+  width: 128px; height: 168px;
+  border: 0; background: none; padding: 0;
+  cursor: pointer;
+}
+.spike:focus-visible { outline-offset: 6px; border-radius: 8px; }
+.spike-base {
+  position: absolute; left: 50%; bottom: 0; translate: -50% 0;
+  width: 92px; height: 18px; border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 35%, var(--rail-hi), var(--rail-lo) 75%);
+  box-shadow: 0 4px 10px rgba(0,0,0,.22);
+}
+.spike { perspective: 900px; perspective-origin: 50% 0; }
+.spike-pin { /* sits behind the pile, so it only shows between layers and above the top slip */
+  position: absolute; left: 50%; bottom: 9px; translate: -50% 0;
+  width: 4px; height: 150px;
+  background: linear-gradient(to right, var(--rail-lo), var(--rail-hi) 45%, var(--rail-lo));
+  clip-path: polygon(50% 0, 100% 8%, 100% 100%, 0 100%, 0 8%);
+  z-index: 0;
+}
+/* each finished slip lies flat on the spike, pierced through the middle */
+.mini {
+  --y: calc(28px + var(--i) * 9px);
+  position: absolute; left: 50%; bottom: calc(var(--y) - 52px);
+  width: 88px; height: 104px; margin-left: -44px;
+  z-index: 1;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(0,0,0,.55) 0 2.5px, rgba(0,0,0,.12) 3.5px, transparent 5px),
+    repeating-linear-gradient(to bottom, transparent 0 14px, rgba(42,39,35,.13) 14px 16px, transparent 16px 22px) 14px 18px / 58% 60% no-repeat,
+    var(--receipt);
+  -webkit-mask: var(--torn); mask: var(--torn);
+  transform: rotateX(70deg) rotateZ(calc(var(--tilt) * 14)) rotateY(calc(var(--tilt) * 1.5));
+  filter: brightness(calc(.76 + var(--i) * .04)) drop-shadow(0 2px 1px rgba(0,0,0,.5));
+  transition: transform .25s ease;
+}
+.spike-count {
+  position: absolute; right: 6px; bottom: 0; z-index: 3;
+  min-width: 22px; height: 22px; padding: 0 6px;
+  border-radius: 11px; background: var(--ink); color: var(--steel);
+  font: 700 12px/22px var(--body);
+}
+.spike.empty { opacity: .55; }
+.spike-pin.pin-top { z-index: 2; bottom: var(--from); height: calc(159px - var(--from)); clip-path: polygon(50% 0, 100% 10%, 100% 100%, 0 100%, 0 10%); }
+
+.spike-view { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; padding: 4vh 16px; }
+.spike-view[hidden] { display: none; }
+.spike-view.open .pick-backdrop { opacity: 1; }
+.spike-panel { position: relative; width: min(440px, 100%); max-height: 88vh; display: flex; flex-direction: column; }
+/* the spike picture on the left, the title stacked beside it, the buttons in a row underneath */
+.spike-head { display: flex; align-items: center; gap: 16px; color: var(--service-ink); margin-bottom: 12px; }
+.spike-head h2 { max-width: 6.6ch; } /* "On the / spike" stacks; other titles wrap the same way */
+.spike-head-actions { margin: 0; }
+/* Past shifts and End shift sit at the bottom, like the other windows' buttons */
+.spike-foot { flex: none; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.12); }
+.spike-foot #spike-end { width: 100%; }
+.spike-foot .btn.end-shift { margin-left: auto; }
+.spike-head-actions:has(#spike-end:empty) { display: none; }
+.spike-x { position: absolute; top: 0; right: 0; z-index: 2; color: var(--service-soft); border-color: transparent; font-size: 20px; line-height: 1; padding: 8px 10px; }
+.spike-x:hover { color: var(--service-ink); background: rgba(255,255,255,.07); }
+.spike-head-actions .btn { color: var(--service-soft); border-color: transparent; }
+/* the spike illustration, now a little picture in the spike view: the same stack of slips */
+.spike-art-wrap { position: relative; flex: none; width: 90px; height: 118px; margin: -10px 0 -4px -8px; }
+.spike.spike-art { position: absolute; left: 0; top: 0; right: auto; bottom: auto; z-index: auto; scale: .7; transform-origin: 0 0; cursor: default; pointer-events: none; }
+.spike.spike-art .spike-count { display: none; }
+.spike-head h2 { font: 700 34px/1 var(--print); margin: 0; }
+.spike-head .btn { color: var(--service-soft); border-color: transparent; }
+.spike-head-actions { display: flex; gap: 8px; align-items: center; }
+#spike-end { display: flex; gap: 8px; align-items: center; }
+.past-shifts { display: grid; gap: 10px; width: min(460px, 100%); margin: 0 auto; }
+.past-shift {
+  text-align: left; background: var(--receipt); color: #2a2723; border: 0; border-radius: 3px;
+  padding: 14px 16px; font: 14px/1.4 var(--print); display: grid; gap: 6px; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.past-shift:hover, .past-shift:focus-visible { outline: 3px solid var(--order); outline-offset: 2px; }
+.past-shift .when { color: #6b655b; font-size: 13px; }
+.past-shift .when i { font-style: normal; border: 1px solid #b7b0a2; border-radius: 3px; padding: 0 5px; margin-left: 6px; font-size: 11px; }
+.past-shift .nums { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; }
+.past-shift .nums b { font-size: 18px; }
+.spike-head-actions .btn.end-shift { border-color: var(--service-soft); color: var(--service-ink); padding: 7px 14px; }
+.spike-head-actions .btn.end-shift:hover { background: rgba(255,255,255,.07); }
+.shift-sofar { margin: 4px 0 12px; color: var(--service-soft); font-size: 14px; }
+.shift-sofar:empty { display: none; }
+.spike-stack { overflow-y: auto; min-height: 0; padding: 18px 18px 24px; margin: 0 -18px; }
+.spiked-slip {
+  display: grid; gap: 6px;
+  width: 100%;
+  margin-top: -26px;
+  padding: 20px 22px 26px;
+  border: 0; text-align: left; cursor: pointer;
+  background: var(--receipt); color: #2a2723;
+  -webkit-mask: var(--torn); mask: var(--torn);
+  font-family: var(--print);
+  transform: rotate(calc(var(--tilt) * 1.6)) translateX(calc(var(--drop) * 2 - 5px));
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,.35));
+  opacity: 0; translate: 40vw 40vh; scale: .4;
+  transition: translate .45s cubic-bezier(.2,.8,.2,1) calc(var(--i) * 35ms), scale .45s cubic-bezier(.2,.8,.2,1) calc(var(--i) * 35ms), opacity .3s ease calc(var(--i) * 35ms);
+}
+.spiked-slip:first-child { margin-top: 0; }
+.spike-view.open .spiked-slip { opacity: 1; translate: 0 0; scale: 1; }
+.spike-view.open .spiked-slip:hover, .spike-view.open .spiked-slip:focus-visible { translate: -10px 0; transition-delay: 0s; }
+.spiked-slip .when { font-size: 12px; color: #6b655b; }
+.spiked-slip b { font-size: 18px; line-height: 1.2; }
+.spiked-slip .meta { display: flex; gap: 14px; font-size: 13px; color: #6b655b; }
+.spiked-slip .area { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.spiked-slip .area::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.spiked-slip .area.work { color: #2d5ba3; }
+.spiked-slip .area.personal { color: #2c7650; }
+.spike-empty { color: var(--service-soft); font-size: 17px; }
+.shift-actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 22px; color: var(--service-soft); font-size: 14px; }
+.shift-actions .btn { border-color: var(--service-soft); color: var(--service-ink); padding: 9px 16px; }
+.shift-actions .btn:hover { background: rgba(255,255,255,.06); }
+.shift-actions .btn.go { background: var(--order); border-color: var(--order); color: var(--order-ink); padding: 12px 22px; font-size: 17px; }
+.shift-receipt {
+  background: var(--receipt); color: #2a2723;
+  -webkit-mask: var(--torn); mask: var(--torn);
+  font: 15px/1.45 var(--print);
+  padding: 30px 26px 34px;
+  rotate: -0.8deg;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.4));
+  animation: print-out .5s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes print-out { from { clip-path: inset(0 0 100% 0); translate: 0 -12px; } to { clip-path: inset(0 0 0 0); translate: 0 0; } }
+.shift-receipt .when { margin: 0; color: #6b655b; font-size: 14px; }
+.shift-receipt hr { border: 0; border-top: 1.5px dashed rgba(42, 39, 35, .35); margin: 14px 0; }
+.shift-receipt .lines { display: grid; grid-template-columns: 1fr auto auto; gap: 4px 14px; }
+.shift-receipt .lines .num { text-align: right; font-variant-numeric: tabular-nums; }
+.shift-receipt .total { font-weight: 700; font-size: 17px; }
+.shift-receipt .by-ticket { display: grid; gap: 10px; }
+.shift-receipt .by-ticket .lines { gap: 2px 14px; }
+.shift-receipt .by-ticket .head { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #6b655b; }
+.shift-receipt .by-ticket .name { overflow-wrap: anywhere; }
+.shift-receipt .by-ticket .name i { font-style: normal; font-weight: 700; }
+.shift-receipt .by-ticket .sub { grid-column: 1 / -1; font-size: 13px; color: #6b655b; }
+.shift-receipt .by-ticket .share { grid-column: 1 / -1; display: block; align-self: start; height: 4px; background: rgba(42, 39, 35, .1); margin-top: 3px; }
+.shift-receipt .by-ticket .share i { display: block; height: 100%; background: #2a2723; }
+.shift-receipt .sample-stamp {
+  margin: 0 0 6px; display: inline-block; padding: 2px 10px; rotate: -3deg;
+  border: 2px solid #9a3a2a; color: #9a3a2a; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; font-size: 13px;
+}
+.shift-receipt .sample-note { margin: 4px 0 0; font-size: 13px; color: #6b655b; }
+.shift-receipt .key { margin: 10px 0 0; font-size: 12px; color: #6b655b; }
+.shift-receipt .foot { margin: 18px 0 0; text-align: center; color: #6b655b; font-size: 13px; }
+@media (prefers-reduced-motion: reduce) { .shift-receipt { animation: none; } }
+.spiked-tag { border: 1.5px solid currentColor; padding: 0 7px; border-radius: 3px; font-weight: 700; }
+@media (max-width: 760px) {
+  .spike-fab { right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+  .spike-art-wrap { width: 78px; height: 102px; }
+  .spike.spike-art { scale: .6; }
+  .spike-head h2 { font-size: 30px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spiked-slip { transition: none; translate: 0 0; scale: 1; opacity: 1; }
+}
+
+/* the timer docked beside the slip */
+.focus.docked {
+  left: 50%; right: 0;
+  background: transparent;
+  padding: 24px clamp(16px, 4vw, 64px) 24px clamp(14px, 2.4vw, 44px);
+}
+.focus.docked .stage { margin: 0; max-width: 560px; }
+.focus.docked .task { display: none; }
+.focus.docked .crumb { justify-content: space-between; }
+.focus.docked .clock { font-family: var(--print); font-weight: 700; font-size: clamp(72px, 9.5vw, 156px); letter-spacing: -0.03em; }
+.focus.docked .ask { font-family: var(--print); font-size: clamp(32px, 3.6vw, 52px); }
+.focus.docked .answer { grid-template-columns: repeat(2, minmax(0, 200px)); }
+.focus.docked .answer button { font-family: var(--print); font-size: 32px; padding: 22px 18px; }
+.focus.docked .earned { font-family: var(--print); font-size: clamp(72px, 9vw, 140px); }
+.pick.in-session .pick-panel { visibility: hidden; }
+.big-slip .tear {
+  position: relative; height: 0; margin: 16px 0 4px;
+  border-top: 1.5px dashed rgba(42, 39, 35, .35);
+}
+.big-slip .tear i {
+  position: absolute; left: 0; top: -2.5px; height: 3.5px; width: 0;
+  background: #2a2723; border-radius: 2px;
+  transition: width .25s linear;
+}
+.big-slip .live-note { margin: 10px 0 12px; }
+
+/* ---------- dialogs ---------- */
+dialog {
+  border: 0;
+  border-radius: 10px;
+  padding: 0;
+  width: min(560px, calc(100vw - 32px));
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+}
+dialog::backdrop { background: rgba(15,18,20,.45); }
+.dlg { padding: 22px 24px 24px; }
+.dlg h2 { font: 700 30px/1 var(--display); margin: 0 0 16px; }
+.dlg h3 { font: 600 20px/1.1 var(--display); margin: 24px 0 10px; }
+.dlg .hint { font-size: 14px; color: var(--ink-soft); margin: 4px 0 0; }
+.field { display: grid; gap: 5px; margin-bottom: 14px; }
+.field[hidden], .field-pair[hidden], .weeks[hidden] { display: none; }
+.support { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 10px; }
+.support { line-height: 2; }
+.support a {
+  display: inline-block; line-height: 1.4; margin: 0 2px;
+  background: var(--order); color: #1d1a16; font-weight: 700; text-decoration: none;
+  padding: 3px 10px; border-radius: 999px;
+}
+.support a:hover, .support a:focus-visible { background: color-mix(in srgb, var(--order) 85%, white); outline: none; box-shadow: 0 0 0 2px var(--ink-soft); }
+.support a.plain, .support a.plain:hover { display: inline; margin: 0; background: none; padding: 0; border-radius: 0; box-shadow: none; color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.support a.plain:focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 2px; background: none; box-shadow: none; }
+.data-io { border-top: 1px solid var(--line); margin: 14px 0 6px; padding-top: 12px; }
+.data-io .label { font-weight: 600; display: block; margin-bottom: 8px; }
+.data-io-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.import-confirm { margin-top: 10px; padding: 12px; border: 1.5px solid var(--ink-soft); border-radius: 8px; }
+.import-confirm[hidden] { display: none; }
+.import-confirm p { margin: 0 0 8px; }
+.import-confirm .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.import-confirm label { display: flex; gap: 6px; align-items: center; margin: 0 0 10px; font-size: 14px; }
+.types-list { display: grid; gap: 6px; margin: 2px 0 2px; }
+.type-row { display: flex; gap: 4px; align-items: center; }
+.type-row input, .type-add input { border: 1.5px solid var(--line); background: var(--paper); border-radius: 6px; padding: 7px 10px; flex: 1; min-width: 0; }
+.type-row .btn, .type-add .btn { padding: 6px 9px; }
+.type-row .first { font-size: 12px; color: var(--ink-soft); width: 58px; text-align: center; flex: none; }
+.type-row [data-type-up] { width: 58px; flex: none; }
+.type-add { display: flex; gap: 6px; margin-top: 6px; }
+.field-pair { display: grid; grid-template-columns: 2fr 1fr; gap: 0 12px; }
+@media (max-width: 520px) { .field-pair { grid-template-columns: 1fr; } }
+.field > span { font-size: 14px; font-weight: 600; }
+.field input, .field textarea {
+  border: 1.5px solid var(--line); background: var(--paper); border-radius: 6px; padding: 9px 11px; width: 100%;
+}
+.field textarea { min-height: 72px; resize: vertical; }
+.check { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; font-weight: 500; }
+.check input { width: 18px; height: 18px; }
+.dlg-foot { display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap; margin-top: 18px; }
+.dlg-foot .right { display: flex; gap: 8px; }
+.close-x { float: right; }
+.settings-x { font-size: 18px; line-height: 1; padding: 6px 10px; margin: -4px -8px 0 0; }
+
+.balance { font: 700 56px/1 var(--display); margin: 0; }
+.reward { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 12px 0; border-top: 1px solid var(--line); align-items: center; }
+.reward .name { font-weight: 600; }
+.reward .price { font-size: 14px; color: var(--ink-soft); }
+.reward .meter { grid-column: 1 / -1; margin: 2px 0 0; }
+.reward.is-ready .price strong { color: var(--ink); }
+.reward .acts { display: flex; gap: 6px; }
+.reward .acts .btn { padding: 5px 10px; font-size: 14px; }
+.inline-form { display: grid; grid-template-columns: 1fr 96px 112px auto; gap: 8px; margin-top: 12px; }
+.inline-form input, .inline-form select { border: 1.5px solid var(--line); background: var(--paper); border-radius: 6px; padding: 8px 10px; min-width: 0; }
+.history { list-style: none; margin: 0; padding: 0; font-size: 14px; color: var(--ink-soft); }
+.history li { padding: 4px 0; }
+.weeks { display: flex; gap: 10px; align-items: flex-end; height: 120px; padding-top: 8px; }
+.week { flex: 1; display: grid; grid-template-rows: 1fr auto auto; height: 100%; text-align: center; font-size: 12px; color: var(--ink-soft); }
+.week .col { display: flex; align-items: flex-end; justify-content: center; }
+.week .col i { display: block; width: 100%; max-width: 38px; background: var(--personal); border-radius: 3px 3px 0 0; min-height: 2px; }
+.week b { color: var(--ink); font-size: 13px; }
+
+/* ---------- quick start (before the walkthrough on a brand-new board) ---------- */
+.setup { position: fixed; inset: 0; z-index: 95; display: grid; place-items: center; padding: 16px; background: rgba(16, 18, 20, .58); overflow-y: auto; }
+.setup[hidden] { display: none; }
+.setup-card {
+  --ink: #2a2723; --ink-soft: #6b655b;
+  width: min(480px, 100%); max-height: calc(100vh - 32px); overflow-y: auto;
+  background: var(--receipt); color: var(--ink);
+  -webkit-mask: var(--torn); mask: var(--torn);
+  padding: 34px 26px 36px; font: 15px/1.45 var(--print);
+  filter: drop-shadow(0 12px 24px rgba(0,0,0,.25));
+}
+.setup-card .top { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .08em; }
+.setup-card h2 { font: 700 24px/1.2 var(--print); margin: 8px 0 14px; }
+.setup-card fieldset { border: 0; border-top: 1.5px dashed rgba(42, 39, 35, .35); margin: 0; padding: 14px 0 6px; }
+.setup-card legend { font-weight: 700; padding: 0 8px 0 0; }
+.setup-card .hint { font-size: 13px; color: var(--ink-soft); margin: 8px 0 4px; }
+.setup-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.setup-chips label { cursor: pointer; }
+.setup-chips input { position: absolute; opacity: 0; pointer-events: none; }
+.setup-chips span { display: inline-block; border: 1.5px solid var(--ink); border-radius: 999px; padding: 5px 11px; font-size: 13px; }
+.setup-chips input:checked + span { background: var(--ink); color: var(--receipt); }
+.setup-chips input:focus-visible + span { outline: 3px solid var(--order); outline-offset: 2px; }
+.setup-custom { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; margin-top: 10px; }
+.setup-custom[hidden] { display: none; }
+.setup-custom label span, .setup-rewards .head span { display: block; font-size: 12px; color: var(--ink-soft); margin-bottom: 2px; }
+.setup-card input[type=text], .setup-card input[type=number] {
+  width: 100%; font: 14px var(--print); color: var(--ink); background: rgba(255,255,255,.55);
+  border: 1.5px solid rgba(42, 39, 35, .45); border-radius: 4px; padding: 6px 8px;
+}
+.setup-rewards { display: grid; grid-template-columns: 1fr 96px 96px; gap: 6px 8px; margin-top: 6px; align-items: center; }
+.setup-rewards .ptime { font-size: 12px; color: var(--ink-soft); line-height: 1.2; }
+@media (max-width: 520px) { .setup-rewards { grid-template-columns: 1fr 76px 76px; } }
+.setup-rewards .head { display: contents; }
+.setup-card .tear { border-top: 1.5px dashed rgba(42, 39, 35, .35); margin: 12px 0 16px; }
+.setup-card .acts { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.setup-card .btn { border-color: var(--ink); color: var(--ink); font-family: var(--print); }
+.setup-card .btn.go { background: var(--order); border-color: var(--order); color: #1d1a16; font-weight: 700; padding: 9px 22px; }
+.setup-card .btn.quiet { border-color: transparent; color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; }
+.setup-card .foot { margin-top: 12px; }
+@media (max-width: 520px) { .setup-custom { grid-template-columns: 1fr; } .setup-card { padding: 30px 18px 32px; } }
+
+/* ---------- walkthrough ---------- */
+/* The board dims around whatever the tip is about, and the tip is a dark expo note so it never blends into the slips. */
+.tour-spot {
+  position: fixed; z-index: 89; pointer-events: none;
+  border: 3px solid var(--order); border-radius: 10px;
+  box-shadow: 0 0 0 9999px rgba(16, 18, 20, .58);
+  transition: opacity .2s ease;
+}
+.tour-spot[hidden] { display: none; }
+.tour-spot.soft { box-shadow: none; }
+.tour {
+  position: fixed; z-index: 90; width: min(330px, calc(100vw - 32px));
+  background: #1d2023; color: #f1ece0;
+  border-radius: 6px;
+  padding: 26px 20px 20px;
+  font: 15px/1.5 var(--print);
+  box-shadow: 0 14px 34px rgba(0,0,0,.45);
+  rotate: -0.4deg;
+  transition: opacity .2s ease;
+}
+.tour::before { /* a strip of yellow tape holding the note up */
+  content: ""; position: absolute; top: -9px; left: 50%; width: 74px; height: 18px; translate: -50% 0; rotate: 2deg;
+  background: var(--order); opacity: .92; border-radius: 2px;
+}
+.tour[hidden] { display: none; }
+.tour .top { display: flex; justify-content: space-between; font-size: 12px; color: #a8a294; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+.tour h2 { font: 700 19px/1.25 var(--print); margin: 0 0 6px; color: var(--order); }
+.tour p { margin: 0; }
+.tour.compact { width: min(290px, calc(100vw - 32px)); padding: 22px 16px 14px; font-size: 14px; }
+.tour.compact h2 { font-size: 17px; }
+.tour.compact .top { margin-bottom: 4px; }
+.tour.compact .acts { margin-top: 12px; }
+.tour .tear { border-top: 1.5px dashed rgba(241, 236, 224, .3); margin: 14px 0 12px; }
+.tour .acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tour .btn { border-color: #f1ece0; color: #f1ece0; font-family: var(--print); padding: 7px 12px; font-size: 14px; }
+.tour .btn:hover { background: rgba(241, 236, 224, .1); }
+.tour .btn.go { background: var(--order); border-color: var(--order); color: #1d1a16; font-weight: 700; }
+.tour .btn.go:hover { background: color-mix(in srgb, var(--order) 88%, white); }
+.tour .btn.quiet { border-color: transparent; color: #a8a294; padding: 7px 4px; margin-left: auto; }
+@media (prefers-reduced-motion: reduce) { .tour, .tour-spot { transition: none; } }
+.today .practice button { background: none; border: 0; padding: 0 2px; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+  background: var(--steel); color: var(--ink);
+  border: 1.5px solid var(--ink-soft);
+  padding: 10px 14px; border-radius: 8px;
+  display: flex; gap: 14px; align-items: center;
+  z-index: 100;
+  font-size: 15px;
+}
+.toast[hidden] { display: none; }
+.spike-view:not([hidden]) ~ .toast { bottom: 92px; } /* clear of the spike view's bottom buttons */
+.toast button { background: transparent; border: 0; color: var(--ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; padding: 2px 4px; }
+
+@media (max-width: 760px) {
+  .wordmark .logo { height: 40px; width: auto; max-width: 100%; }
+  .bar { grid-template-columns: minmax(0, 1fr) auto; gap: 12px 12px; padding: 12px 16px; }
+  /* icon-only Rewards and Settings so the header fits narrow phones */
+  .bar-actions .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .rewards-btn, .settings-btn { padding: 8px 10px; }
+  .stats { grid-column: 1 / -1; grid-row: 2; gap: 20px; }
+  .controls { padding: 4px 16px 16px; }
+  .add { flex-wrap: wrap; }
+  .add input[type=text] { flex-basis: 100%; }
+  .tickets { padding: 18px 16px 18px; scroll-padding: 0 16px; gap: 14px; }
+  .ticket { flex-basis: min(76vw, 260px); }
+  .answer { grid-template-columns: 1fr 1fr; }
+  .inline-form { grid-template-columns: 1fr 1fr; }
+  .today { padding: 6px 16px 12px; }
+  body { padding-bottom: 96px; } /* room so the spike button never covers anything */
+  body { overflow-x: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  .ticket { transform: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <h1 class="wordmark"><span class="sr-only">Yes, Chef</span><svg class="logo" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="-16.4 -71.6 383.7 126.3"><path fill="currentColor" d="M88.2-65.3L90.5-63.7Q91.2-63.1 91.2-62.3Q91.2-61.4 90.6-60.8L90.6-60.8L79.1-48.4Q62.5-28.9 41.7 0.4L41.7 0.4Q36.4 9.3 23.5 22.2L23.5 22.2Q16.7 29.1 8.3 33.9Q0 38.7-7.1 38.7L-7.1 38.7Q-8.6 38.7-10.5 36.9Q-12.4 35.1-12.4 31.8L-12.4 31.8Q-12.4 27.4-6.6 21.6Q-0.7 15.7 7.2 11.6Q15.1 7.5 20.6 7.5L20.6 7.5L21 7.5Q39.9-14.4 44.3-19.3L44.3-19.3L60.2-36.8Q60.3-36.9 60.5-37.1Q60.6-37.3 61-37.8L61-37.8Q61.8-38.8 61.6-38.8L61.6-38.8Q61.4-38.8 59.9-37.4L59.9-37.4L45.4-23.2Q19 2.7 6.9 2.7L6.9 2.7Q4 2.7 1.4 0.4Q-1.3-1.9-1.3-6.1L-1.3-6.1Q-1.3-14.1 13.4-28.8L13.4-28.8L40.1-52.6Q44.9-57.1 44.9-58.5L44.9-58.5Q44.9-58.9 44.3-58.9Q43.7-58.9 41.4-58.5Q39.1-58.1 34.3-56.6Q29.4-55 24.1-52.6Q18.7-50.2 11.8-45.6Q4.8-41-1.5-35.2L-1.5-35.2Q-2.5-33.8-3.7-33.8L-3.7-33.8L-4-33.8Q-4.4-33.9-4.4-34.3L-4.4-34.3Q-4.4-35.3-2.9-36.8L-2.9-36.8Q6-49.6 18.4-57.7Q30.8-65.8 40.7-65.8L40.7-65.8Q44.9-65.8 48.4-63.6Q51.9-61.3 51.9-56L51.9-56Q51.9-52.3 47.4-46.6Q42.9-40.8 36.5-34.9Q30-29 23.5-23.4L23.5-23.4Q8-9.9 8-5.8L8-5.8Q8-5.6 9.0-5.6Q9.9-5.6 13.0-7.1Q16-8.6 20.1-11.4Q24.2-14.2 28.3-17.2Q32.3-20.1 37.3-24Q42.2-27.9 45.6-30.6L45.6-30.6Q55-38.1 57.9-40.6L57.9-40.6L79.1-58.7L85-64.5Q86-65.6 86.9-65.6Q87.8-65.6 88.2-65.3L88.2-65.3ZM14.6 14.8L18.4 10.1Q19.2 9.3 19.2 9.2Q19.2 9 19 9L19 9L17.3 9.6Q7.6 14.8-0.3 23.4Q-8.2 32-8.2 34.9L-8.2 34.9Q-8.2 35.2-7.9 35.2L-7.9 35.2L-7.3 35Q-2.2 32 4.3 25.8Q10.7 19.6 14.6 14.8L14.6 14.8ZM91.2-30.2L91.2-30.2Q88.6-30.2 82.4-24.9Q76.2-19.5 76.2-18.3L76.2-18.3Q76.2-18.1 76.5-18.1L76.5-18.1Q78.7-18.1 85.3-23Q91.8-27.9 91.8-29.7L91.8-29.7Q91.8-30.2 91.2-30.2ZM69.9 1.8L69.9 1.8Q62.2 1.8 62.2-7.6L62.2-7.6Q62.2-13.5 67.4-20.2Q72.5-26.8 79.5-31.1Q86.5-35.3 91.9-35.3L91.9-35.3Q94.3-35.3 96.3-33.4Q98.4-31.5 98.4-29.7L98.4-29.7Q98.4-26.4 93.7-22.3Q89-18.1 83.9-15.6Q78.7-13 77.1-13Q75.4-13 74.6-14.5L74.6-14.5Q74.2-14.8 73.5-14.8Q72.8-14.8 71.2-12.2Q69.6-9.5 69.6-7.9Q69.6-6.2 70.8-5.8L70.8-5.8Q78.4-5.8 87.3-10.3Q96.2-14.7 111.9-25.9L111.9-25.9Q113-26.7 115.3-28.3Q117.5-29.9 117.9-30.2L117.9-30.2Q118.8-29.5 118.8-28.5Q118.8-27.5 117.9-26.7L117.9-26.7Q112.9-21.7 105.0-15.5Q97-9.3 86.7-3.8Q76.4 1.8 69.9 1.8ZM110.5-7.3Q114.0-7.3 116.9-11.6Q119.9-15.8 121.1-20.2Q122.3-24.5 122.3-27.1L122.3-27.1Q122.3-27.8 121.2-27.8Q120.2-27.8 118.8-26.7L118.8-26.7L105.7-16.6Q104.3-15.8 102.5-15.8Q100.7-15.8 100.7-17.1L100.7-17.1Q100.7-18 100.9-18.3Q101.2-18.6 102.4-19.3L102.4-19.3Q109.8-24.4 122.6-35.9L122.6-35.9Q124.1-37.9 125.3-37.9Q126.5-37.9 129.3-37.1Q132.1-36.4 132.1-35.4L132.1-35.4Q132.1-29.4 131-24.5Q129.9-19.6 128.8-17.1Q127.6-14.5 127.6-14.3Q127.6-14.1 127.8-14.1Q128.0-14.1 128.6-14.4L128.6-14.4Q136.1-18.2 147.7-26.8L147.7-26.8L150.1-28.6Q151-27.9 151-26.9Q151-25.9 150.1-25.1L150.1-25.1Q149.9-25.1 144.9-20.9Q140-16.7 133.9-11.8Q127.9-6.8 121.0-2.7Q114.1 1.4 110.3 1.4L110.3 1.4Q100.9 1.4 100.9-9.9L100.9-9.9Q100.9-10.8 101.6-11.6Q102.4-12.3 103.6-12.3L103.6-12.3Q103.6-11.8 104.1-10.8Q104.7-9.7 105.3-9L105.3-9Q107.1-7.3 110.5-7.3ZM143-8.5L143-8.5Q144-8.5 144.3-8.1L144.3-8.1Q145.7-6.4 145.7-5.4L145.7-5.4Q145.7-3.5 141.9 0.9L141.9 0.9Q136.6 7 135 7L135 7Q134.7 7 134.7 6.7Q134.7 6.4 135.1 5.8L135.1 5.8Q136.6 3.8 137.1 2.9L137.1 2.9L137.7 1.9Q136.2 2.4 135.3 2.4L135.3 2.4Q133.5 2.1 133.5 0.2L133.5 0.2Q133.5-2.8 137.1-5.7Q140.7-8.5 143-8.5ZM171.3-12.3L171.2-14.2Q171.3-23.5 177.8-33.4Q184.2-43.2 193.8-50.7Q203.4-58.1 215.1-62.9Q226.8-67.6 237.1-67.6L237.1-67.6Q243-67.6 248.1-65.2Q253.1-62.7 253.1-57.8Q253.1-52.8 247.4-47.1Q241.8-41.3 233.9-37.3Q226.1-33.2 220.2-33.2L220.2-33.2Q217.5-33.2 214.6-34.7Q211.7-36.2 211.7-38.9L211.7-38.9Q211.7-40.4 214.1-41.5L214.1-41.5Q222.6-44.9 226.9-48.1L226.9-48.1Q227.8-49.1 228.3-49.1Q228.7-49.1 228.7-48.3L228.7-48.3Q228.7-46.9 225.3-45L225.3-45Q222.9-43.2 222.9-43Q222.9-42.8 223-42.8L223-42.8Q225-42.8 235.2-50.5Q245.4-58.2 245.4-60.4L245.4-60.4Q245.4-61.8 242.7-61.8L242.7-61.8Q233.1-61.8 223.2-57.3Q213.3-52.7 205.7-45.9Q198-39 191.8-31.4Q185.6-23.7 182.3-17.2Q179-10.6 179-7L179-7Q179-4.8 181.1-4.8L181.1-4.8Q182.9-4.8 188.3-6.4Q193.7-8 203.9-12.8Q214.2-17.6 223.7-24.3L223.7-24.3Q224.4-24.9 224.7-24.9Q224.9-24.9 224.9-24.5Q224.9-24.1 223.2-21.1Q221.4-18.1 217.8-13.8Q214.3-9.5 209.8-5.5Q205.3-1.4 198.9 1.5Q192.6 4.4 187.3 4.4Q181.9 4.4 178.8 2.5Q175.8 0.6 174.4-2.2L174.4-2.2Q171.5-7.8 171.3-12.3L171.3-12.3ZM246.6-8.8Q246.6-8.3 247-8.3Q247.4-8.3 248.6-8.9L248.6-8.9Q263.5-16.9 281.4-30.2L281.4-30.2Q282.3-29.5 282.3-28.5Q282.3-27.5 281.3-26.6Q280.3-25.7 278.4-24Q276.6-22.3 271.4-17.9Q266.2-13.5 261.7-9.9L261.7-9.9Q249.9-0.4 244.3 1.3L244.3 1.3Q242.5 1.8 240.4 1.8L240.4 1.8Q237 1.8 237-3.5L237-3.5Q237-5.3 239.2-9.5Q241.4-13.6 241.4-15.5L241.4-15.5Q241.4-15.7 241.1-15.7Q240.8-15.7 239.6-14.8L239.6-14.8Q225.7-4 222.7 0.2L222.7 0.2Q222.1 1.1 221.1 1.1L221.1 1.1Q218.9 1.1 218.3-1L218.3-1Q218.3-4 226.8-16.2Q235.2-28.4 246.6-41.9Q258-55.3 265.2-60.8L265.2-60.8Q267.3-62.8 275-62.8L275-62.8Q276.2-62.5 276.2-61.8Q276.2-61.1 275.5-60.4L275.5-60.4Q246.7-32.6 238.9-21.9L238.9-21.9Q238.5-21.5 237.8-20.5Q237.2-19.4 237.2-19.1L237.2-19.1L237.3-19Q237.7-19 243.6-23.5Q249.5-27.9 252.4-29.8L252.4-29.8Q253.3-30.7 256.2-30.7L256.2-30.7Q258.7-30.4 258.7-29.1L258.7-29.1Q258.7-28.7 258.5-28.4L258.5-28.4Q251.1-17.9 249.6-15L249.6-15Q246.6-10.3 246.6-8.8L246.6-8.8ZM294.2-30.2L294.2-30.2Q291.6-30.2 285.4-24.9Q279.2-19.5 279.2-18.3L279.2-18.3Q279.2-18.1 279.5-18.1L279.5-18.1Q281.7-18.1 288.3-23Q294.8-27.9 294.8-29.7L294.8-29.7Q294.8-30.2 294.2-30.2ZM272.9 1.8L272.9 1.8Q265.2 1.8 265.2-7.6L265.2-7.6Q265.2-13.5 270.3-20.2Q275.5-26.8 282.5-31.1Q289.5-35.3 294.9-35.3L294.9-35.3Q297.3-35.3 299.3-33.4Q301.4-31.5 301.4-29.7L301.4-29.7Q301.4-26.4 296.7-22.3Q292-18.1 286.8-15.6Q281.7-13 280.1-13Q278.4-13 277.6-14.5L277.6-14.5Q277.2-14.8 276.5-14.8Q275.8-14.8 274.2-12.2Q272.6-9.5 272.6-7.9Q272.6-6.2 273.8-5.8L273.8-5.8Q281.4-5.8 290.3-10.3Q299.2-14.7 314.9-25.9L314.9-25.9Q316-26.7 318.3-28.3Q320.5-29.9 320.9-30.2L320.9-30.2Q321.8-29.5 321.8-28.5Q321.8-27.5 320.9-26.7L320.9-26.7Q315.9-21.7 307.9-15.5Q300-9.3 289.7-3.8Q279.4 1.8 272.9 1.8ZM304.0 0.9L304.0 0.9Q304.0 1.1 304.5 1.9L304.5 1.9Q305.9 4.1 305.9 8.7Q305.9 13.3 301.1 20.7Q296.4 28 290.1 33.4Q283.9 38.7 279.9 38.7L279.9 38.7Q274.9 38.7 273.6 29.7L273.6 29.7Q273.6 17.3 291.7-3.1L291.7-3.1L346.2-64.8Q346.8-66.8 349.2-66.8L349.2-66.8Q352.9-66.8 354.1-65.9Q355.3-65 355.3-63.8Q355.3-62.5 353.2-60.1L353.2-60.1L304.4-6.8Q304.5-6.7 305.0-6.7Q305.6-6.7 306.2-7L306.2-7Q324.7-16.9 342.6-30.2L342.6-30.2Q343.5-29.5 343.5-28.5Q343.5-27.5 342.5-26.6Q341.6-25.7 339.9-24.1Q338.2-22.4 333.3-18.1Q328.4-13.7 323.8-10.2Q319.3-6.6 313.7-3.3Q308.1 0 304.0 0.9ZM280.5 29.9L280.5 29.9Q283.1 29.9 288.3 24.8Q293.5 19.7 297.7 13.3Q301.9 6.9 301.9 3.6Q301.9 0.2 299.8 0.2L299.8 0.2Q298.9 0.2 297.7 1.2L297.7 1.2Q292.9 5.8 288.5 12.6Q284.1 19.4 282.0 23.9Q279.9 28.4 279.9 29.2Q279.9 29.9 280.5 29.9Z"/><path fill="currentColor" d="M5.6 46.7 C 112.30999999999997 41.7, 254.58999999999992 35.7, 361.29999999999995 24.700000000000003 C 261.70399999999995 41.7, 130.09499999999997 51.7, 5.6 46.7 Z"/></svg></h1>
+  <div class="stats" id="stats"></div>
+  <div class="bar-actions">
+    <button class="btn rewards-btn" id="open-rewards">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg>
+      <span class="label">Rewards</span>
+      <span class="badge" id="rewards-badge" hidden></span>
+    </button>
+    <button class="btn quiet settings-btn" id="open-settings" aria-label="Settings" title="Settings">
+      <svg class="gear" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      <span class="label">Settings</span>
+    </button>
+  </div>
+</header>
+
+<div class="banner" id="banner" hidden></div>
+
+<section class="controls" aria-label="Add and filter">
+  <form class="add" id="add-form" autocomplete="off">
+    <label class="sr-only" for="add-name">Add a slip</label>
+    <input type="text" id="add-name" placeholder="Add a slip: something you're working on or waiting on" maxlength="120">
+    <label class="sr-only" for="add-type">Type</label>
+    <select id="add-type">
+    </select>
+    <label class="sr-only" for="add-area">Area</label>
+    <select id="add-area">
+      <option value="work">Work</option>
+      <option value="personal">Personal</option>
+    </select>
+    <button class="btn solid" type="submit">Add</button>
+  </form>
+  <div class="seg" role="group" aria-label="Show" id="filter">
+    <button data-f="all">All</button>
+    <button data-f="work">Work</button>
+    <button data-f="personal">Personal</button>
+  </div>
+</section>
+
+<main class="rail-wrap" id="rail">
+  <div class="rail-bar" aria-hidden="true"></div>
+  <div class="tickets" id="tickets" aria-label="The rail"></div>
+  <button class="rail-nav go-left" id="rail-prev" aria-label="Slide the rail left">&#8249;</button>
+  <button class="rail-nav go-right" id="rail-next" aria-label="Slide the rail right">&#8250;</button>
+  <span class="rail-count" id="rail-count" aria-live="polite"></span>
+</main>
+
+<section class="today" id="today" aria-label="Today"></section>
+
+<!-- focus / service screen -->
+<section class="focus" id="focus" hidden aria-live="polite"></section>
+
+<!-- ticket lifted off the rail -->
+<section class="pick" id="pick" hidden role="dialog" aria-modal="true" aria-labelledby="pick-title">
+  <div class="pick-backdrop" data-p="close"></div>
+  <div class="slip-hold" id="slip-hold"><div class="big-slip" id="big-slip"></div></div>
+  <div class="pick-panel" id="pick-panel"></div>
+</section>
+
+<!-- rewards -->
+<dialog id="rewards-dlg">
+  <div class="dlg">
+    <button class="btn quiet close-x settings-x" data-close aria-label="Close rewards">&#10005;</button>
+    <h2>Rewards</h2>
+    <p class="balance" id="r-balance"></p>
+    <p class="hint">Your running total. Claiming a reward never takes points away. Each reward comes around again every time you pass its mark. <span id="r-rate"></span></p>
+    <div id="r-list" style="margin-top:16px"></div>
+    <form class="inline-form" id="r-add" autocomplete="off">
+      <input id="r-name" placeholder="Reward" required maxlength="80" aria-label="Reward name">
+      <input id="r-price" type="number" min="1" step="1" placeholder="Every … pts" required aria-label="Earned every this many points">
+      <select id="r-size" aria-label="Size">
+        <option value="small">Small</option><option value="medium" selected>Medium</option><option value="big">Big</option>
+      </select>
+      <button class="btn solid" type="submit">Add</button>
+    </form>
+    <p class="hint pts-time" id="r-price-time"></p>
+    <h3 id="r-weeks-title">Phone-free sessions by week</h3>
+    <div class="weeks" id="r-weeks"></div>
+    <h3>Claimed</h3>
+    <ul class="history" id="r-history"></ul>
+  </div>
+</dialog>
+
+<!-- settings -->
+<dialog id="settings-dlg">
+  <form class="dlg" id="settings-form" method="dialog">
+    <button type="button" class="btn quiet close-x settings-x" id="s-close" aria-label="Close settings">&#10005;</button>
+    <h2>Settings</h2>
+    <p class="hint" style="margin:-6px 0 14px">Changes save as you make them.</p>
+    <label class="field"><span>Points per minute worked</span><input id="s-rate" type="number" min="0.5" step="0.5">
+      <p class="hint">At 5 per minute, a 15-minute burst earns 75 and a 45-minute one earns 225.</p></label>
+    <label class="field"><span>After each session, ask</span>
+      <select id="s-check">
+        <option value="phone">Did you use your phone?</option>
+        <option value="games">Did you play any games?</option>
+        <option value="up">Did you get up from the computer?</option>
+        <option value="custom">My own question</option>
+        <option value="off">Don't ask, just log the time</option>
+      </select>
+      <p class="hint">Pick the thing you're keeping away from while you work. A No earns full points.</p>
+    </label>
+    <div id="s-custom" class="field-pair">
+      <label class="field"><span>Your question</span><input id="s-ask" type="text" maxlength="80" placeholder="Did you check the news?"></label>
+      <label class="field"><span>Short name</span><input id="s-name" type="text" maxlength="24" placeholder="News">
+        <p class="hint">Used in labels, like "News-free streak".</p></label>
+    </div>
+    <label class="field" id="s-cut-field"><span>A Yes costs (% of the session's points)</span>
+      <input id="s-cut" type="number" min="0" max="100" step="5">
+      <p class="hint">Start at 20%. Raise it toward 50% as it gets easier.</p>
+    </label>
+    <label class="field"><span>Hold length (minutes)</span><input id="s-hold" type="number" min="0.5" max="240" step="0.5">
+      <p class="hint">How long a slip stays on hold before it comes back to you.</p></label>
+    <label class="field"><span>Hide sessions shorter than (minutes)</span><input id="s-min" type="number" min="0" max="30" step="1">
+      <p class="hint">Short sessions are always saved. Anything shorter than this is left out of points, streaks, history and reports. Set it to 0 to count everything.</p></label>
+    <p class="hint" id="s-hidden-row" style="margin:-6px 0 14px"><span id="s-hidden-text"></span> <button type="button" class="btn quiet" id="s-clear-hidden" style="padding:2px 4px">Delete them</button></p>
+    <label class="field"><span>Default burst length (minutes)</span><input id="s-burst" type="number" min="1" max="240" step="1"></label>
+    <label class="check"><input type="checkbox" id="s-chime"> Chime halfway through a burst, when it ends, and when a hold ends</label>
+    <label class="check"><input type="checkbox" id="s-notify"> Desktop notification when a burst or a hold ends</label>
+    <label class="field"><span>End shift</span>
+      <select id="s-autoend"><option value="off">Only when I press End shift</option><option value="newday">Automatically on a new day</option></select>
+      <p class="hint">Automatic files the previous shift the first time you open Yes, Chef on a new day. The day turns over at 4 AM, so late nights still count as that day.</p>
+    </label>
+    <div class="field" id="s-types-field"><span>Slip types</span>
+      <div class="types-list" id="s-types"></div>
+      <div class="type-add"><input id="s-type-new" type="text" maxlength="24" placeholder="New type, like Meeting" aria-label="New slip type"><button type="button" class="btn" id="s-type-add">Add</button></div>
+      <p class="hint">Rename one and every slip using it follows. The first type is the default for new slips. Removing a type moves its slips to the first one.</p>
+    </div>
+    <label class="field"><span>Theme</span>
+      <select id="s-theme"><option value="auto">Match system</option><option value="light">Light</option><option value="dark">Dark</option></select>
+    </label>
+    <button type="button" class="btn quiet" id="s-tour">Show the walkthrough again</button>
+    <div class="data-io">
+      <span class="label">Your data</span>
+      <div class="data-io-btns">
+        <button type="button" class="btn" id="s-export">Export data</button>
+        <button type="button" class="btn" id="s-import">Import data</button>
+        <input type="file" id="s-import-file" accept="application/json,.json" hidden>
+      </div>
+      <p class="hint">Export downloads a backup file of your whole board. Import loads a backup, a data.json from another device, or a copy from Yes, Chef on a computer.</p>
+      <div class="import-confirm" id="s-import-confirm" hidden></div>
+    </div>
+    <p class="hint" id="s-file"></p>
+    <p class="hint support">Yes, Chef is free and runs entirely on your device. If it helps you focus, you can <a href="https://buymeacoffee.com/kkubesh" target="_blank" rel="noopener noreferrer">buy me a coffee &#9749;</a>. The code is open on <a class="plain" href="https://github.com/KKubesh/yes-chef" target="_blank" rel="noopener noreferrer">GitHub</a>, and feedback is welcome.</p>
+    <div class="dlg-foot">
+      <span></span>
+      <div class="right">
+        <button class="btn solid" value="done">Done</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<button class="spike-fab" id="spike-fab" aria-label="The spike: finished tickets">
+  <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 14.6V25.5" stroke-width="2.2"/><path d="M9 11.2 22.8 9.6 24 19.3l-1.85 1.05-1.85-.95-1.85 1.05-1.85-.95-1.85 1.05-1.85-.95-1.85 1.05-1.85-.95z" fill="var(--steel)" stroke-width="1.6"/><path d="M11.6 14.4l2.8-.32M18.2 13.65l3-.34M12.3 17.2l6.8-.75" stroke-width="1.1" opacity=".55"/><path d="M16 3.5V14.6" stroke-width="2.2"/><ellipse cx="16" cy="27" rx="8.5" ry="2.4" fill="currentColor" stroke="none" opacity=".85"/></svg>
+  <span class="badge" id="spike-fab-count" hidden></span>
+</button>
+
+<section class="spike-view" id="spike-view" hidden role="dialog" aria-modal="true" aria-labelledby="spike-title">
+  <div class="pick-backdrop" data-s="close"></div>
+  <div class="spike-panel">
+    <button class="btn quiet spike-x" data-s="close" aria-label="Close">&#10005;</button>
+    <div class="spike-head">
+      <div class="spike-art-wrap" aria-hidden="true"><div class="spike spike-art empty" id="spike"></div></div>
+      <h2 id="spike-title">On the spike</h2>
+    </div>
+    <p class="shift-sofar" id="shift-sofar"></p>
+    <div class="spike-stack" id="spike-stack"></div>
+    <div class="spike-head-actions spike-foot"><span id="spike-end"></span></div>
+  </div>
+</section>
+
+<section class="setup" id="setup" hidden role="dialog" aria-modal="true" aria-labelledby="setup-title">
+  <form class="setup-card" id="setup-form" autocomplete="off" novalidate>
+    <div class="top"><span>Quick start</span><span>Everything here is optional</span></div>
+    <h2 id="setup-title">Make it yours</h2>
+    <fieldset>
+      <legend>After each session, ask</legend>
+      <div class="setup-chips" id="setup-check"></div>
+      <div class="setup-custom" id="setup-custom" hidden>
+        <label><span>Your question</span><input id="setup-ask" type="text" maxlength="80" placeholder="Did you check the news?"></label>
+        <label><span>Short name</span><input id="setup-name" type="text" maxlength="24" placeholder="News"></label>
+      </div>
+      <p class="hint">A No earns full points. A Yes still counts, just for a bit less.</p>
+    </fieldset>
+    <fieldset>
+      <legend>Rewards to work toward</legend>
+      <div class="setup-rewards" id="setup-rewards"></div>
+      <p class="hint">Each minute of focused work earns <b id="setup-rate"></b> points, so 100 points is about <b id="setup-100"></b>. Rewards repeat, so a break every 150 can be claimed at 150, 300 and on. Clear a name to drop it.</p>
+    </fieldset>
+    <div class="tear" aria-hidden="true"></div>
+    <div class="acts"><button class="btn go" type="submit">Start</button><button class="btn quiet" type="button" data-setup="skip">Skip, keep the defaults</button></div>
+    <p class="hint foot">Everything else, and these too, can be changed any time in Settings.</p>
+  </form>
+</section>
+
+<div class="tour-spot" id="tour-spot" hidden aria-hidden="true"></div>
+<section class="tour" id="tour" hidden role="dialog" aria-live="polite" aria-label="Walkthrough"></section>
+
+<div class="toast" id="toast" hidden role="status"><span id="toast-text"></span><button id="toast-undo">Undo</button></div>
+
+<script>
+(() => {
+'use strict';
+
+// ---------- data ----------
+// Slip types live in settings.types as [{ id, name }] so people can rename, add, reorder and remove them.
+// Ids never change, so a rename carries every slip with it. The first type is the default for new slips.
+// Older boards used fixed types (person, waiting, ai, render, delivery); normalize() folds those into
+// "followup", and any slip whose type no longer exists moves to the first type.
+const DEFAULT_TYPES = () => [{ id: 'task', name: 'Task' }, { id: 'followup', name: 'Follow-up' }, { id: 'errand', name: 'Errand' }];
+const OLD_TYPES = { person: 'followup', waiting: 'followup', ai: 'followup', render: 'followup', delivery: 'followup' };
+const slipTypes = () => state.settings.types;
+const typeName = (id) => (slipTypes().find(x => x.id === id) || slipTypes()[0]).name;
+const typeOr = (id) => (slipTypes().some(x => x.id === id) ? id : slipTypes()[0].id);
+function cleanTypes(list) {
+  const seen = new Set();
+  const out = (Array.isArray(list) ? list : []).filter(x => x && typeof x.id === 'string' && typeof x.name === 'string' && x.name.trim() && !seen.has(x.id) && seen.add(x.id))
+    .map(x => ({ id: x.id, name: x.name.trim().slice(0, 24) }));
+  return out.length ? out : DEFAULT_TYPES();
+}
+const SIZE_LABEL = { small: 'Small', medium: 'Medium', big: 'Big' };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+function defaults() {
+  return {
+    version: DATA_VERSION,
+    settings: { pointsPerMinute: 5, phoneCutPct: 20, check: 'phone', checkAsk: '', checkName: '', types: DEFAULT_TYPES(), minSessionMin: 2, autoEndShift: 'off', holdMinutes: 2, burstMinutes: 15, chime: true, notify: false, theme: 'auto' },
+    tickets: [],
+    sessions: [],
+    rewards: [
+      { id: uid(), name: '15-minute break', price: 150, size: 'small' },
+      { id: uid(), name: 'Coffee run', price: 900, size: 'medium' },
+      { id: uid(), name: 'Dinner out', price: 4800, size: 'big' },
+    ],
+    purchases: [],
+    shifts: [],          // archived shifts: { id, startedAt, endedAt, ticketIds, sessions, minutes, points, phoneFree }
+    shiftStartedAt: null,
+    active: null,
+  };
+}
+function withOrder(list) {
+  if (list.every(t => typeof t.order === 'number')) return list;
+  [...list].sort((a, b) => a.createdAt - b.createdAt).forEach((t, i) => { if (typeof t.order !== 'number') t.order = i; });
+  return list;
+}
+// ---------- data format versions ----------
+// Every saved file carries `version`. Most changes don't need a new version: add the new field with a
+// default in normalize() below. When the format has to change in a way defaults can't cover (renaming,
+// restructuring), bump DATA_VERSION and add a step to MIGRATIONS that converts the version before it.
+// Steps run in order when a file loads, so a file from any older version is brought all the way forward,
+// and the storage layer keeps a copy of the original first.
+// Rules: never rename or remove a field without a migration step; keep anything unrecognized when saving.
+const DATA_VERSION = 1;
+const MIGRATIONS = {
+  // 1: (d) => { /* convert a version-1 file to version 2 */ d.version = 2; return d; },
+};
+function migrate(raw) {
+  if (!raw || typeof raw !== 'object' || !raw.version) return raw;
+  let d = raw;
+  while (d.version < DATA_VERSION && MIGRATIONS[d.version]) {
+    const from = d.version;
+    d = MIGRATIONS[from](JSON.parse(JSON.stringify(d)));
+    if (!(d.version > from)) throw new Error(`Migration from version ${from} didn't move the version on`);
+  }
+  return d;
+}
+const needsMigration = (raw) => !!(raw && raw.version && raw.version < DATA_VERSION);
+
+function normalize(raw) {
+  const d = defaults();
+  if (!raw || typeof raw !== 'object' || !raw.version) return d;
+  raw = migrate(raw);
+  const settings = (({ basePoints, ...rest }) => ({ ...d.settings, ...rest }))(raw.settings || {});
+  settings.types = cleanTypes(settings.types);
+  const ids = new Set(settings.types.map(x => x.id));
+  const fixType = (type) => (ids.has(type) ? type : ids.has(OLD_TYPES[type]) ? OLD_TYPES[type] : settings.types[0].id);
+  return {
+    ...d, ...raw,
+    settings,
+    tickets: withOrder((Array.isArray(raw.tickets) ? raw.tickets : []).map(t => (ids.has(t.type) ? t : { ...t, type: fixType(t.type) }))),
+    sessions: (Array.isArray(raw.sessions) ? raw.sessions : []).filter(x => sessionMinutes(x) > 0),
+    rewards: Array.isArray(raw.rewards) ? raw.rewards : d.rewards,
+    purchases: Array.isArray(raw.purchases) ? raw.purchases : [],
+    shifts: Array.isArray(raw.shifts) ? raw.shifts : [],
+  };
+}
+
+let state = defaults();
+let storeMode = 'file'; // 'file' (server) or 'browser' (fallback)
+let saveTimer = null;
+const LS_KEY = 'focus-app-data';
+
+function lsGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch {} }
+
+async function load() {
+  try {
+    const r = await fetch('/api/data', { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status);
+    const raw = await r.json();
+    state = normalize(raw);
+    if (!raw || !raw.version) { addPractice(); state.tour = 'pending'; setTimeout(() => save(true), 0); } // brand-new board
+    // if the cleanup removed anything (empty sessions), write it back right away
+    if (Array.isArray(raw.sessions) && raw.sessions.length !== state.sessions.length) setTimeout(() => save(true), 0);
+    storeMode = 'file';
+    fetch('/api/info').then(r => r.json()).then(i => { $('#s-file').textContent = 'Your data is saved in ' + i.dataFile; }).catch(() => {});
+  } catch {
+    storeMode = 'browser';
+    let raw = null;
+    try { raw = JSON.parse(lsGet(LS_KEY) || 'null'); } catch {}
+    state = normalize(raw);
+    if (!raw || !raw.version) { addPractice(); state.tour = 'pending'; }
+    showBanner('Saving in this browser only. Start the app with "node server.js" to save to your data file.');
+    $('#s-file').textContent = 'Saving in this browser only.';
+  }
+}
+
+function save(now) {
+  clearTimeout(saveTimer);
+  const run = async () => {
+    const body = JSON.stringify(state);
+    if (storeMode === 'browser') { lsSet(LS_KEY, body); return; }
+    try {
+      const r = await fetch('/api/data', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body });
+      if (!r.ok) throw new Error(await r.text());
+      hideBanner();
+    } catch (e) {
+      lsSet(LS_KEY, body);
+      showBanner('Couldn\'t save to your data file. Check that the app is still running in Terminal. Your latest changes are kept in this browser for now.');
+    }
+  };
+  if (now) run(); else saveTimer = setTimeout(run, 150);
+}
+
+// ---------- helpers ----------
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmtPts = (n) => Math.round(n).toLocaleString();
+function age(ts) {
+  const m = Math.max(0, Math.floor((Date.now() - ts) / 60000));
+  if (m < 1) return 'just now';
+  if (m < 60) return m + 'm';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + 'h';
+  return Math.floor(h / 24) + 'd';
+}
+function clock(sec) {
+  sec = Math.max(0, Math.floor(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  const mm = String(m).padStart(h ? 2 : 1, '0'), ss = String(s).padStart(2, '0');
+  return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+function startOfDay(d = new Date()) { const x = new Date(d); x.setHours(0, 0, 0, 0); return x.getTime(); }
+function startOfWeek(ts) { const d = new Date(ts); const day = (d.getDay() + 6) % 7; d.setDate(d.getDate() - day); d.setHours(0, 0, 0, 0); return d.getTime(); }
+// Each slip gets its own small, stable imperfections, seeded by its id.
+function slip(id) {
+  let h = 2166136261;
+  for (const c of id) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  const rand = () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return ((h ^= h >>> 16) >>> 0) / 4294967296; };
+  const tilt = (rand() * 2 - 1) * 2.8;           // -2.8 to 2.8 degrees
+  const extra = Math.round(rand() * 34);          // 0 to 34px longer
+  const drop = Math.round(rand() * 5);            // hangs 0 to 5px lower on the rail
+  return `--tilt:${tilt.toFixed(2)}deg;--extra:${extra}px;--drop:${drop}px`;
+}
+
+// Points are a running total that only goes up. Each reward is a repeating milestone:
+// a 150-point break can be claimed at 150, 300, 450... Claiming never takes points away.
+// Sessions shorter than the minimum (2 minutes by default, set in Settings) are still saved, just hidden:
+// they're left out of points, streaks, history and reports until the minimum is lowered.
+function minSession() { const v = Number(state.settings.minSessionMin); return v >= 0 && v <= 30 ? v : 2; }
+const counts = (x) => sessionMinutes(x) >= minSession();
+const shownSessions = () => state.sessions.filter(counts);            // for a slip's own history (includes practice)
+const liveSessions = () => shownSessions().filter(x => !x.tutorial);  // for points, streaks, today, shifts
+const hiddenSessions = () => state.sessions.filter(x => !counts(x));
+const minText = () => minSession() === 1 ? '1 minute' : `${minSession()} minutes`;
+const sessionMinutes = (x) => x.minutes ?? (x.durationSec || 0) / 60;
+function earned() { return liveSessions().reduce((a, s) => a + (s.points || 0), 0); }
+function balance() { return earned(); }
+function claimsFor(r) { return state.purchases.filter(p => p.rewardId === r.id).length; }
+function rewardStatus(r, total = earned()) {
+  const price = Math.max(1, r.price);
+  const reached = Math.floor(total / price);
+  const claimed = claimsFor(r);
+  const ready = Math.max(0, reached - claimed);
+  // The next mark is the first one you haven't already claimed.
+  const nextAt = (Math.max(reached, claimed) + 1) * price;
+  // Progress since the last mark; if claims are ahead of points, show progress toward the next mark from zero instead.
+  const since = total - (nextAt - price);
+  const pct = Math.max(0, Math.min(100, since >= 0 ? (since / price) * 100 : (total / nextAt) * 100));
+  return { ready, nextAt, toGo: nextAt - total, pct, claimed };
+}
+const readyRewards = () => state.rewards.filter(r => rewardStatus(r).ready > 0);
+// The end-of-session check: what you're keeping away from, or off.
+const CHECKS = {
+  phone: { ask: 'Did you use your phone?', clean: 'Phone-free', slip: 'Phone use' },
+  games: { ask: 'Did you play any games?', clean: 'Game-free', slip: 'Gaming' },
+  up:    { ask: 'Did you get up from the computer?', clean: 'Stayed put', slip: 'Getting up' },
+};
+function avoid() {
+  const st = state.settings;
+  if (st.check === 'off') return { on: false };
+  if (st.check === 'custom') {
+    const name = (st.checkName || '').trim() || 'Distraction';
+    return { on: true, ask: (st.checkAsk || '').trim() || `Did you slip on ${name.toLowerCase()}?`, clean: `${cap(name)}-free`, slip: cap(name) };
+  }
+  return { on: true, ...(CHECKS[st.check] || CHECKS.phone) };
+}
+const cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+const low = (x) => x.charAt(0).toLowerCase() + x.slice(1);
+// Sessions logged with the check off (checked: false) don't count toward or against the streak.
+const wasChecked = (x) => x.checked !== false;
+function streak() {
+  let n = 0;
+  const live = liveSessions();
+  for (let i = live.length - 1; i >= 0; i--) { const x = live[i]; if (!wasChecked(x)) continue; if (x.phone) break; n++; }
+  return n;
+}
+// The reward whose next milestone is closest.
+function nextReward() {
+  let best = null;
+  for (const r of state.rewards) {
+    const st = rewardStatus(r);
+    if (!best || st.toGo < best.toGo) best = { ...r, ...st };
+  }
+  return best;
+}
+function actualMinutes(a) { return Math.max(0, (a.endedAt - a.startedAt) / 60000); }
+// Minutes that earn points: the real time, or less if I lowered it on the check screen.
+function creditedMinutes(a) {
+  const actual = actualMinutes(a);
+  return typeof a.creditMin === 'number' ? Math.min(actual, Math.max(0, a.creditMin)) : actual;
+}
+function fmtMin(m) { if (m > 0 && m < 0.5) return '<1 min'; m = Math.round(m); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} hr${m % 60 ? ` ${m % 60} min` : ''}`; }
+// Points in plain time: how much focused work a number of points takes at the current rate.
+function ptsTime(points) {
+  const rate = Number(state.settings.pointsPerMinute) || 0;
+  if (!(rate > 0) || !(points > 0)) return '';
+  return fmtMin(points / rate);
+}
+function checkPreview(m) {
+  if (!avoid().on) return `${fmtMin(m)}. Earns ${fmtPts(pointsFor(false, m))} points.`;
+  return `${fmtMin(m)}. No earns ${fmtPts(pointsFor(false, m))} points. Yes earns ${fmtPts(pointsFor(true, m))}.`;
+}
+// Points scale with time worked, then a Yes on the check takes its percentage cut.
+function pointsFor(phone, minutes) {
+  const base = Math.max(0, minutes) * (Number(state.settings.pointsPerMinute) || 0);
+  return Math.round(phone ? base * (1 - (Number(state.settings.phoneCutPct) || 0) / 100) : base);
+}
+
+let bannerEl;
+function showBanner(t) { bannerEl.textContent = t; bannerEl.hidden = false; }
+function hideBanner() { if (storeMode === 'file') bannerEl.hidden = true; }
+
+let toastTimer, toastUndo;
+function toast(text, undo, ms = 30000, label = 'Undo') {
+  // An open window (Rewards, Settings) sits above the page, so the toast moves inside it to stay clickable.
+  const host = document.querySelector('dialog[open]') || document.body;
+  if ($('#toast').parentElement !== host) host.appendChild($('#toast'));
+  $('#toast-text').textContent = text;
+  $('#toast-undo').hidden = !undo;
+  $('#toast-undo').textContent = label;
+  toastUndo = undo;
+  $('#toast').hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { $('#toast').hidden = true; toastUndo = null; }, ms);
+}
+
+// ---------- export / import ----------
+// Export: download the whole board as a .json file. Import: replace the board with a file (backup, data.json
+// from another device). Older formats are converted on the way in, and the current board can be downloaded first.
+function boardSummary(d) {
+  const tickets = (d.tickets || []).filter(t => !t.archivedAt && !t.tutorial).length;
+  const pts = (d.sessions || []).filter(x => !x.tutorial && (x.minutes ?? (x.durationSec || 0) / 60) >= minSession()).reduce((a, x) => a + (x.points || 0), 0);
+  return `${tickets} ${tickets === 1 ? 'ticket' : 'tickets'} in play, ${fmtPts(pts)} points`;
+}
+function downloadBoard(label = 'backup') {
+  const body = JSON.stringify(state, null, 2);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([body], { type: 'application/json' }));
+  const d = new Date(), day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  a.download = `yes-chef-${label}-${day}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function readImport(file) {
+  const box = $('#s-import-confirm');
+  file.text().then((text) => {
+    let raw;
+    try { raw = JSON.parse(text); } catch { raw = null; }
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw) || !(raw.version || Array.isArray(raw.tickets))) {
+      box.innerHTML = '<p>That file isn\'t Yes, Chef data. Pick a .json file that Yes, Chef exported or saved.</p>';
+      box.hidden = false; box.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); return;
+    }
+    if (!raw.version) raw.version = 1; // very old files didn't record one
+    if (raw.version > DATA_VERSION) {
+      box.innerHTML = '<p>That file was saved by a newer Yes, Chef. Update this copy first, then import it.</p>';
+      box.hidden = false; box.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); return;
+    }
+    box.innerHTML = `
+      <p><b>Replace your board with this file?</b></p>
+      <p class="hint" style="margin:0 0 4px">This file: ${boardSummary(raw)}.</p>
+      <p class="hint">Your board now: ${boardSummary(state)}.</p>
+      <label><input type="checkbox" id="s-import-keep" checked> Download a copy of my current board first</label>
+      <div class="row"><button type="button" class="btn solid" id="s-import-go">Replace my board</button><button type="button" class="btn quiet" id="s-import-cancel">Cancel</button></div>`;
+    box.hidden = false; box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    $('#s-import-cancel').onclick = () => { box.hidden = true; box.innerHTML = ''; };
+    $('#s-import-go').onclick = () => {
+      if (state.active) { box.innerHTML = '<p>A session is running. Finish or cancel it, then import.</p>'; return; }
+      if ($('#s-import-keep').checked) downloadBoard('before-import');
+      const before = JSON.parse(JSON.stringify(state));
+      try { localStorage.setItem('yes-chef-before-import', JSON.stringify(before)); } catch {}
+      state = normalize(raw);
+      state.tour = 'done'; // an imported board never restarts the walkthrough
+      state.setupDone = true;
+      if (tourOn()) endTour();
+      box.hidden = true; box.innerHTML = '';
+      $('#settings-dlg').close('import'); // not 'save': the form still shows the old board's settings
+      save(true); applyTheme(); render();
+      toast('Board imported.', () => { state = before; save(true); applyTheme(); render(); });
+    };
+  });
+}
+
+function applyTheme() {
+  const t = state.settings.theme;
+  if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+  else delete document.documentElement.dataset.theme;
+}
+
+// ---------- walkthrough ----------
+// A fresh board starts with a few practice slips that show the board mid-shift, plus four short tips.
+// Practice slips are marked tutorial: true, and clearing them removes them along with any sessions on them.
+const hasPractice = () => state.tickets.some(t => t.tutorial);
+let tourStep = -1;
+const tourOn = () => tourStep >= 0;
+function addPractice() {
+  if (hasPractice()) return;
+  const now = Date.now(), o = frontOrder();
+  const M = 60000;
+  const mk = (n, name, ago, extra) => ({ id: uid(), name, type: slipTypes()[0].id, area: 'work', note: '', ready: false, holdUntil: null,
+    createdAt: now - ago * M, doneAt: null, order: o - 10 + n, tutorial: true, ...extra });
+  const start = mk(0, 'Start here: open this slip', 190, { note: 'Open a slip to start a session on it, jot where you left off, put it on hold, or spike it when it\'s done.' });
+  const sam = mk(1, 'Waiting on a reply from Sam', 150, { type: typeOr('followup'), practice: 'hold', holdUntil: now + 75000, note: 'On hold. When the time runs out it comes back to the front with a chime.' });
+  const groceries = mk(2, 'Pick up groceries', 40, { type: typeOr('errand'), area: 'personal', note: 'Work or personal. Filter the rail at the top right.' });
+  const update = mk(3, 'Send the weekly update', 240, { doneAt: now - 12 * M, note: 'Finished, so it went on the spike.' });
+  state.tickets.push(start, sam, groceries, update);
+  // A little work history so the slips look like a real shift. Practice sessions show on their slips only:
+  // they never count toward points, streaks, today's line or shift totals.
+  const rate = Number(state.settings.pointsPerMinute) || 0;
+  const ses = (t, min, endedAgo, mode = 'open') => ({ id: uid(), ticketId: t.id, ticketName: t.name, area: t.area, mode,
+    startedAt: now - (endedAgo + min) * M, endedAt: now - endedAgo * M, durationSec: min * 60, minutes: min,
+    phone: false, points: Math.round(min * rate), cutPct: 0, checked: false, tutorial: true });
+  state.sessions.push(
+    ses(update, 30, 200), ses(start, 25, 150), ses(sam, 10, 95),
+    ses(start, 15, 55, 'burst'), ses(update, 12, 14),
+  );
+  state.sessions.sort((a, b) => a.endedAt - b.endedAt);
+}
+function clearPractice() {
+  const gone = state.tickets.filter(t => t.tutorial);
+  if (!gone.length) return;
+  const ids = new Set(gone.map(t => t.id));
+  const goneSessions = state.sessions.filter(x => ids.has(x.ticketId));
+  if (pickId && ids.has(pickId)) closePick(false);
+  state.tickets = state.tickets.filter(t => !t.tutorial);
+  state.sessions = state.sessions.filter(x => !ids.has(x.ticketId));
+  endTour();
+  save(); render();
+  if (spikeOpen) openSpike();
+  toast('Practice tickets cleared. The board is yours.', () => {
+    state.tickets.push(...gone); state.sessions.push(...goneSessions);
+    state.sessions.sort((a, b) => a.endedAt - b.endedAt);
+    save(); render();
+  });
+}
+const practiceEl = (pick) => { const t = state.tickets.find(t => t.tutorial && !t.doneAt && pick(t)); return t && document.querySelector(`.ticket[data-id="${t.id}"]`); };
+const TOUR = [
+  { target: () => practiceEl(t => !t.holdUntil && t.area === 'work') || $('#tickets .ticket'), title: 'This is your rail',
+    text: 'Every slip is something in flight. The front of the line is on the left. Open a slip to start working on it.' },
+  { target: () => practiceEl(t => t.practice === 'hold' || t.type === 'followup'), title: 'Waiting on something?',
+    text: 'Put it on hold. It dims and counts down, then comes back to the front with a chime. Keep an eye on this one.' },
+  { target: () => spikeBtn(), title: 'The spike', sample: true,
+    text: 'When a ticket is done, spike it. Click the spike to look back at your work. When you wrap up, press End shift: it clears the board and gives you a shift report. Settings can do it for you each new day.' },
+  { target: () => $('#open-rewards'), title: 'Points and rewards',
+    text: () => {
+      const rs = [...state.rewards].sort((a, b) => a.price - b.price), r = rs[Math.floor(rs.length / 2)];
+      return `Every minute of focused work earns ${fmtPts(Number(state.settings.pointsPerMinute) || 0)} points. Rewards are milestones you set${r ? `, like ${esc(r.name)} every ${fmtPts(r.price)} points (about ${ptsTime(r.price)} of focused work)` : ''}. Claiming one never costs points.`;
+    } },
+  { target: () => $('#add-name'), title: 'Your turn',
+    text: 'Type what you\'re working on and press Enter. Settings has the rest, like what the end-of-session question asks. These practice slips can go now.', last: true },
+];
+// ---------- quick start ----------
+// One optional screen before the walkthrough: what the end-of-session check asks, and the starter rewards.
+const CHECK_CHOICES = [['phone', 'Did you use your phone?'], ['games', 'Did you play any games?'], ['up', 'Did you get up from the computer?'], ['custom', 'My own question'], ['off', 'Don\'t ask']];
+function beginOnboarding() { if (state.setupDone) startTour(); else showSetup(); }
+function showSetup() {
+  const st = state.settings;
+  $('#setup-check').innerHTML = CHECK_CHOICES.map(([v, l]) =>
+    `<label><input type="radio" name="setup-check" value="${v}" ${(st.check || 'phone') === v ? 'checked' : ''}><span>${l}</span></label>`).join('');
+  $('#setup-ask').value = st.checkAsk || ''; $('#setup-name').value = st.checkName || '';
+  $('#setup-custom').hidden = st.check !== 'custom';
+  $('#setup-rate').textContent = fmtPts(Number(st.pointsPerMinute) || 0); $('#setup-100').textContent = ptsTime(100);
+  $('#setup-rewards').innerHTML = '<div class="head"><span>Reward</span><span>Every … points</span><span>Work it takes</span></div>' + state.rewards.map(r => `
+    <input type="text" data-rw="${r.id}" maxlength="60" value="${esc(r.name)}" aria-label="Reward name">
+    <input type="number" data-rp="${r.id}" min="1" step="1" value="${r.price}" aria-label="Points for ${esc(r.name)}">
+    <span class="ptime" data-pt="${r.id}">≈ ${ptsTime(r.price)}</span>`).join('');
+  $('#setup').hidden = false;
+  setTimeout(() => $('#setup .btn.go').focus({ preventScroll: true }), 60);
+}
+function finishSetup(keep) {
+  if (!keep) {
+    const st = state.settings;
+    st.check = document.querySelector('[name=setup-check]:checked')?.value || 'phone';
+    st.checkAsk = $('#setup-ask').value.trim(); st.checkName = $('#setup-name').value.trim();
+    if (st.check === 'custom' && !st.checkAsk && !st.checkName) st.check = 'phone';
+    state.rewards = state.rewards.map(r => {
+      const name = document.querySelector(`[data-rw="${r.id}"]`)?.value.trim();
+      const price = Math.round(Number(document.querySelector(`[data-rp="${r.id}"]`)?.value));
+      return name ? { ...r, name, price: price > 0 ? price : r.price } : null;
+    }).filter(Boolean);
+  }
+  state.setupDone = true;
+  $('#setup').hidden = true;
+  save(); render();
+  startTour();
+}
+
+let tourTimer = null;
+function startTour() {
+  state.setupDone = true;
+  tourStep = 0; state.tour = 'pending'; tourSeen.clear(); tourSampleSeen = false; tourCtx = 'rail';
+  delete $('#tour').dataset.step; delete $('#tour').dataset.shown;
+  renderStats(); placeTour();
+  // keep the tip beside its slip as the rail moves, and tucked away while a slip, the spike or a window is open
+  clearInterval(tourTimer); tourTimer = setInterval(placeTour, 400);
+}
+function endTour() {
+  tourStep = -1; clearInterval(tourTimer);
+  if (state.tour !== 'done') { state.tour = 'done'; save(); }
+  $('#tour').hidden = true; $('#tour-spot').hidden = true;
+  renderStats();
+}
+// Tips for wherever the walkthrough leads them: inside a slip, a session, the check, the results, the spike.
+const SIDE = {
+  pick: { target: () => $('#pick-panel [data-p=start]'), at: ['right', 'below', 'top'], title: 'Start a session',
+    text: 'Pick a length, or Open, no timer, then Start work.' },
+  running: { target: () => $('#focus [data-f=end]'), at: ['below', 'top'], title: 'You\'re on the clock',
+    text: () => `Stay with this one thing. Press End work when you stop.${minSession() ? ` Runs under ${minText()} are saved but hidden from your points.` : ''}` },
+  check: { target: () => $('#focus .answer'), at: ['left', 'below'], title: 'Quick check',
+    text: () => avoid().on ? 'Be honest. A Yes still counts, it just earns a bit less. Want a different question? Change it, or turn it off, in Settings.' : 'Lower the minutes if you forgot to stop the clock, then log it.' },
+  result: { target: () => $('#focus .actions'), at: ['below', 'left', 'top'], title: 'Points on the board',
+    text: 'These add up toward your rewards. Spike it if it\'s done, or head back to keep the walkthrough going.' },
+  review: { target: () => $('#pick-panel [data-p=unspike]'), at: ['right', 'top'], title: 'Looking back',
+    text: 'This one\'s done. Not really? Put it back on the rail. Otherwise close it and it stays on the spike.' },
+  spike: { target: () => $('#spike-stack .spiked-slip') || $('#spike-stack'), at: ['below', 'left', 'top'], title: 'Finished work',
+    text: 'Click a slip to look back at it. End shift files them all into a shift report and clears the board.' },
+};
+// Views that "Back to the walkthrough" can close (not mid-session: that would lose the session).
+const SIDE_NEXT = { pick: () => closePick(), review: () => closePick(), spike: () => closeSpike(), result: () => closeFocus() };
+const tourSeen = new Set();
+let tourSampleSeen = false; // after the sample, the spike tip leads with Back to the walkthrough // side tips already dismissed this run
+let tourCtx = 'rail';
+function tourContext() {
+  if (document.querySelector('dialog[open]')) return 'hide';
+  if (!$('#focus').hidden) return (state.active && state.active.phase) || F.phase || 'hide';
+  if (pickId) { const t = ticketById(pickId); return pickEdit || !t ? 'hide' : t.doneAt ? 'review' : 'pick'; }
+  if (spikeOpen) return /shift/i.test($('#spike-title').textContent) ? 'hide' : 'spike'; // reports and past shifts explain themselves
+  return 'rail';
+}
+// The tip and its outline never glide around: they fade out, move while hidden, and fade back in.
+// They only follow along without fading while the rail is being scrolled.
+let tourFading = false, railScrolledAt = 0;
+function placeTour() {
+  const card = $('#tour');
+  if (!card) return;
+  const spot = $('#tour-spot');
+  const hide = () => { card.hidden = true; spot.hidden = true; card.style.opacity = spot.style.opacity = '0'; };
+  if (!tourOn()) return hide();
+  const ctx = tourContext();
+  // back on the rail after a side trip: same step as before, and slide the rail back to its slip to reorient them
+  if (ctx === 'rail' && tourCtx !== 'rail' && tourCtx !== 'hide') delete card.dataset.shown;
+  if (ctx !== 'hide') tourCtx = ctx;
+  if (ctx === 'hide' || (ctx !== 'rail' && (!SIDE[ctx] || tourSeen.has(ctx)))) return hide();
+  if (tourFading) return; // mid-fade: the fade finishes, then places it
+
+  const side = ctx !== 'rail';
+  const step = side ? SIDE[ctx] : TOUR[tourStep];
+  const key = side ? ctx + (ctx === 'spike' && tourSampleSeen ? '+sample' : '') : `${tourStep}`;
+  const fadeOutThen = () => {
+    tourFading = true;
+    card.style.opacity = spot.style.opacity = '0';
+    setTimeout(() => { tourFading = false; card.hidden = true; spot.hidden = true; placeTour(); }, 200);
+  };
+  const showing = !card.hidden;
+  if (showing && card.dataset.step !== key) return fadeOutThen(); // new tip: fade the old one out first
+
+  const el = step.target();
+  // a new rail step: slide the rail so its slip is in view, and wait for the slide to finish before appearing
+  if (el && card.dataset.shown !== key) {
+    card.dataset.shown = key;
+    if (el.closest('#tickets')) { el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); railScrolledAt = Date.now(); }
+    else if (!side) { const r = el.getBoundingClientRect(); if (r.bottom > innerHeight || r.top < 0) { el.scrollIntoView({ block: 'center' }); } } // e.g. the spike below the board on a phone
+  }
+  const scrolling = Date.now() - railScrolledAt < 350;
+  if (!showing && scrolling && el && el.closest('#tickets')) return;
+
+  if (card.dataset.step !== key) {
+    card.dataset.step = key;
+    const text = typeof step.text === 'function' ? step.text() : step.text;
+    card.innerHTML = `
+      <div class="top"><span>Walkthrough</span><span>${side ? '' : `${tourStep + 1} of ${TOUR.length}`}</span></div>
+      <h2>${step.title}</h2>
+      <p>${text}</p>
+      ${side ? '' : '<div class="tear" aria-hidden="true"></div>'}
+      <div class="acts">${side
+        ? ctx === 'spike'
+          ? tourSampleSeen
+            ? `<button class="btn go" data-tour="side-back" data-ctx="spike">Back to the walkthrough</button><button class="btn quiet" data-tour="sample-spike">See the sample again</button>`
+            : `<button class="btn go" data-tour="sample-spike">See a sample report</button><button class="btn quiet" data-tour="side-back" data-ctx="spike">Back to the walkthrough</button>`
+          : SIDE_NEXT[ctx]
+          ? `<button class="btn go" data-tour="side-back" data-ctx="${ctx}">Back to the walkthrough</button><button class="btn quiet" data-tour="seen" data-ctx="${ctx}">Stay here</button>`
+          : `<button class="btn go" data-tour="seen" data-ctx="${ctx}">Got it</button><button class="btn quiet" data-tour="end">End walkthrough</button>`
+        : step.last
+        ? '<button class="btn go" data-tour="clear">Clear practice tickets</button><button class="btn quiet" data-tour="end">Keep them for now</button>'
+        : `<button class="btn go" data-tour="next">Next</button>${step.sample ? '<button class="btn" data-tour="sample">See an example</button>' : ''}<button class="btn quiet" data-tour="end">Skip</button>`}</div>`;
+  }
+  card.classList.toggle('compact', side);
+  spot.classList.toggle('soft', side); // inside a slip or session the screen is already dimmed, so just ring the spot
+  if (!showing) card.style.opacity = '0';
+  card.hidden = false;
+
+  const cw = card.offsetWidth, ch = card.offsetHeight, vw = innerWidth, vh = innerHeight, m = 16;
+  let top, left, box = null;
+  if (el) {
+    const r = el.getBoundingClientRect(), pad = 8;
+    box = { left: r.left - pad, top: r.top - pad, width: r.width + pad * 2, height: r.height + pad * 2 };
+    const g = 24, cx = r.left + r.width / 2 - cw / 2, cy = r.top - 6; // beside: line up with the top of what it points at, so text above stays clear
+    const spots = {
+      below: [r.bottom + g, cx, r.bottom + g + ch <= vh - m],
+      above: [r.top - g - ch, cx, r.top - g - ch >= m],
+      left:  [cy, r.left - g - cw, r.left - g - cw >= m],
+      right: [cy, r.right + g, r.right + g + cw <= vw - m],
+      top:   [m, (vw - cw) / 2, r.top > m + ch + g],
+    };
+    // try the places this tip prefers, then the usual order; first one that fits wins
+    const order = [...(step.at || []), 'below', 'above', 'right', 'left'];
+    const at = order.find(k => spots[k][2]) || order[0];
+    [top, left] = spots[at];
+  } else { top = vh - ch - 90; left = (vw - cw) / 2; }
+  top = Math.max(m, Math.min(vh - ch - m, top));
+  left = Math.max(m, Math.min(vw - cw - m, left));
+
+  // the slip it points at moved on its own (it came off hold, the window changed): fade over rather than glide
+  if (showing && !scrolling && (Math.abs(parseFloat(card.style.top) - top) > 30 || Math.abs(parseFloat(card.style.left) - left) > 30)) return fadeOutThen();
+
+  card.style.top = top + 'px'; card.style.left = left + 'px';
+  if (box) Object.assign(spot.style, { left: box.left + 'px', top: box.top + 'px', width: box.width + 'px', height: box.height + 'px' });
+  if (!showing) {
+    spot.style.opacity = '0';
+    spot.hidden = !box;
+    requestAnimationFrame(() => requestAnimationFrame(() => { card.style.opacity = '1'; if (box) spot.style.opacity = '1'; }));
+  } else {
+    spot.hidden = !box;
+    if (box && spot.style.opacity !== '1') spot.style.opacity = '1';
+  }
+}
+
+// ---------- rail ----------
+let filter = lsGet('focus-filter') || 'all';
+
+function renderStats() {
+  const b = balance();
+  // today's work sits with the other numbers; tap or hover it for the breakdown
+  const today = liveSessions().filter(s => s.endedAt >= startOfDay());
+  const free = today.filter(s => wasChecked(s) && !s.phone).length;
+  const pts = today.reduce((a, s) => a + s.points, 0);
+  const mins = today.reduce((a, s) => a + sessionMinutes(s), 0);
+  const detail = today.length
+    ? `Today: ${today.length} ${today.length === 1 ? 'session' : 'sessions'}${avoid().on ? `, ${free} ${low(avoid().clean)}` : ''}, ${fmtPts(pts)} points.`
+    : 'Nothing yet today. Open a slip, get going.';
+  $('#stats').innerHTML = `
+    <div class="stat"><b>${fmtPts(b)}</b><span>points earned</span></div>
+    ${avoid().on ? `<div class="stat"><b>${streak()}</b><span>${esc(low(avoid().clean))} streak</span></div>` : ''}
+    <button type="button" class="stat stat-today" id="stat-today" title="${esc(detail)}" aria-label="${esc(`${fmtMin(mins)} worked today. ${detail}`)}"><b>${today.length ? fmtMin(mins) : '0 min'}</b><span>worked today</span></button>`;
+
+  // Rewards button: a quiet badge with how many things are ready to claim.
+  const claimable = state.rewards.reduce((a, r) => a + rewardStatus(r, b).ready, 0);
+  const badge = $('#rewards-badge');
+  badge.textContent = claimable > 99 ? '99+' : claimable;
+  badge.hidden = !claimable;
+  $('#open-rewards').setAttribute('aria-label', claimable ? `Rewards, ${claimable} ready to claim` : 'Rewards');
+
+  $('#today').innerHTML = ''; // only the practice reminder lives under the rail now
+  if (hasPractice() && !tourOn()) $('#today').insertAdjacentHTML('beforeend', '<span class="practice">Practice tickets are still on the board. <button type="button" data-tour="clear">Clear them</button></span>');
+}
+
+function renderRail() {
+  document.querySelectorAll('#filter button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.f === filter)));
+  const list = state.tickets
+    .filter(t => !t.doneAt && (filter === 'all' || t.area === filter))
+    .sort(byRail);
+  const el = $('#tickets');
+  if (!list.length) {
+    const hiddenCount = state.tickets.filter(t => !t.doneAt).length;
+    el.innerHTML = `<div class="empty"><b>${hiddenCount ? 'Nothing here in this view' : 'The rail is empty'}</b>${
+      hiddenCount ? 'Switch to All to see the rest of your tickets.' : 'Add the first thing you\'re working on or waiting on. One line is enough.'}</div>`;
+    return;
+  }
+  el.innerHTML = list.map(t => `
+    <article class="ticket${t.ready ? ' is-ready' : ''}${isHeld(t) ? ' is-held' : ''}${t.id === pickId ? ' lifted' : ''}" data-id="${t.id}" style="${slip(t.id)}" tabindex="0" draggable="true" aria-label="${esc(t.name)}. Drag, or press Alt and an arrow key, to move it.">
+      <div class="top"><span>${slipTag(t)}</span><span title="On the rail since ${new Date(t.createdAt).toLocaleString()}">${age(t.createdAt)}</span></div>
+      <h3>${esc(t.name)}</h3>
+      ${t.note ? `<p class="note">${esc(t.note)}</p>` : ''}
+      <span class="area ${t.area}">${t.area === 'personal' ? 'Personal' : 'Work'}</span>
+      <div class="row">
+        <button class="btn solid" data-act="start">Start</button>
+        <button class="btn" data-act="hold">${holdLabel(t)}</button>
+      </div>
+    </article>`).join('');
+  requestAnimationFrame(updateRailEdges);
+}
+
+// Show the end shades, arrows and an off-screen count when the rail is wider than the window.
+function updateRailEdges() {
+  const el = $('#tickets'), wrap = $('#rail');
+  const max = el.scrollWidth - el.clientWidth;
+  const left = el.scrollLeft > 4, right = el.scrollLeft < max - 4;
+  wrap.classList.toggle('more-left', max > 4 && left);
+  wrap.classList.toggle('more-right', max > 4 && right);
+  const cards = [...el.querySelectorAll('.ticket')];
+  const box = el.getBoundingClientRect();
+  const hidden = cards.filter(c => { const r = c.getBoundingClientRect(); return r.right > box.right + 8 || r.left < box.left - 8; }).length;
+  $('#rail-count').textContent = hidden ? `${cards.length} on the rail, ${hidden} out of view` : '';
+}
+function slideRail(dir) {
+  const el = $('#tickets');
+  el.scrollBy({ left: dir * el.clientWidth * 0.8 });
+}
+
+function render() { renderTypeSelect(); renderStats(); renderRail(); renderSpike(); placeTour(); }
+// Keep the add form's type list in step with settings. Rebuilt only when the types change, so an open dropdown isn't disturbed.
+let typeKey = '';
+function renderTypeSelect() {
+  const key = JSON.stringify(slipTypes());
+  if (key === typeKey) return;
+  typeKey = key;
+  const sel = $('#add-type'), cur = sel.value;
+  sel.innerHTML = slipTypes().map(x => `<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
+  sel.value = typeOr(cur);
+}
+
+// ---------- the spike ----------
+let spikeOpen = false;
+const spiked = () => state.tickets.filter(t => t.doneAt && !t.archivedAt).sort((a, b) => b.doneAt - a.doneAt); // newest on top
+
+// the spike's button on screen: the full spike, or the round button on phones
+const spikeBtn = () => $('#spike-fab');
+let spikeArtList = null; // set while a past shift or report is on screen
+function setSpikeArt(list) { spikeArtList = list ? list.map((t, i) => ({ id: t.id || `sample-${i}` })) : null; renderSpike(); }
+function renderSpike() {
+  const fab = $('#spike-fab'), n = spiked().length;
+  if (fab) {
+    $('#spike-fab-count').textContent = n > 99 ? '99+' : n;
+    $('#spike-fab-count').hidden = !n;
+    fab.setAttribute('aria-label', n ? `The spike: ${n} finished ${n === 1 ? 'ticket' : 'tickets'}. Open to review.` : 'The spike: finished tickets land here');
+  }
+  const list = spiked();
+  // The art shows what the view is about: this shift's spike, or the slips from the past shift(s) on screen.
+  const art = spikeArtList || list;
+  const shown = art.slice(0, 7).reverse(); // drawn bottom-up, newest last so it sits on top
+  const btn = $('#spike');
+  btn.classList.toggle('empty', !art.length);
+  btn.setAttribute('aria-label', list.length ? `The spike: ${list.length} finished ${list.length === 1 ? 'ticket' : 'tickets'}. Open to review.` : 'The spike: finished tickets land here');
+  btn.title = list.length ? `${list.length} on the spike` : 'Finished tickets land here';
+  btn.innerHTML = `
+    <span class="spike-base" aria-hidden="true"></span>
+    <span class="spike-pin" aria-hidden="true"></span>
+    ${shown.map((t, i) => `<span class="mini" aria-hidden="true" style="${slip(t.id)};--i:${i}"></span>`).join('')}
+    ${shown.length ? `<span class="spike-pin pin-top" aria-hidden="true" style="--from:${28 + (shown.length - 1) * 9}px"></span>` : ''}
+    ${list.length ? `<span class="spike-count">${list.length}</span>` : ''}`;
+}
+
+// A shift runs from the last End shift (or your first session) until you end it.
+function shiftStart() {
+  if (state.shiftStartedAt) return state.shiftStartedAt;
+  const firsts = [...liveSessions().map(x => x.startedAt), ...spiked().map(t => t.doneAt)].filter(Boolean);
+  return firsts.length ? Math.min(...firsts) : Date.now();
+}
+// until: only count what happened before this time (an automatic end files yesterday, not this morning)
+function shiftTally(until = Infinity, skipPractice = false) {
+  const from = shiftStart();
+  const sessions = liveSessions().filter(x => x.endedAt >= from && x.endedAt < until);
+  const tickets = spiked().filter(t => t.doneAt < until && !(skipPractice && t.tutorial));
+  return {
+    startedAt: from,
+    tickets,
+    sessions: sessions.length,
+    minutes: sessions.reduce((a, x) => a + (x.minutes ?? x.durationSec / 60), 0),
+    points: sessions.reduce((a, x) => a + x.points, 0),
+    phoneFree: sessions.filter(x => wasChecked(x) && !x.phone).length,
+    checked: sessions.filter(wasChecked).length,
+    byTicket: ticketBreakdown(sessions, tickets),
+    lastAt: Math.max(0, ...sessions.map(x => x.endedAt), ...tickets.map(t => t.doneAt)),
+  };
+}
+// Time, points and sessions for each ticket this shift, most time first. Spiked tickets show up even with no sessions.
+function ticketBreakdown(sessions, spikedList) {
+  const rows = new Map();
+  const row = (id, name) => {
+    if (!rows.has(id)) rows.set(id, { ticketId: id, name, sessions: 0, minutes: 0, points: 0, spiked: false });
+    return rows.get(id);
+  };
+  sessions.forEach(x => {
+    const r = row(x.ticketId, ticketById(x.ticketId)?.name || x.ticketName || 'Ticket');
+    r.sessions++; r.minutes += sessionMinutes(x); r.points += x.points || 0;
+  });
+  spikedList.forEach(t => { row(t.id, t.name).spiked = true; });
+  return [...rows.values()].map(r => ({ ...r, minutes: Math.round(r.minutes * 10) / 10 }))
+    .sort((a, b) => b.minutes - a.minutes || (b.spiked - a.spiked));
+}
+function endShift(auto) {
+  // automatic: file everything before this morning's turnover; the shift ends at the last thing that happened in it
+  const cut = auto ? workDayStart(Date.now()) : Infinity;
+  const tally = shiftTally(cut, !!auto);
+  const now = auto ? (tally.lastAt || cut) : Date.now();
+  const shift = {
+    id: uid(), startedAt: tally.startedAt, endedAt: now, ...(auto ? { auto: true } : {}),
+    ticketIds: tally.tickets.map(t => t.id),
+    sessions: tally.sessions, minutes: Math.round(tally.minutes * 10) / 10, points: tally.points, phoneFree: tally.phoneFree,
+    checked: tally.checked, checkLabel: avoid().on ? avoid().clean : null, byTicket: tally.byTicket,
+  };
+  const prevStart = state.shiftStartedAt;
+  tally.tickets.forEach(t => { t.archivedAt = now; t.shiftId = shift.id; });
+  state.shifts.push(shift);
+  state.shiftStartedAt = auto ? cut : now;
+  save(); render();
+  if (auto) {
+    toast(`Your shift from ${new Date(shift.endedAt).toLocaleDateString(undefined, { weekday: 'long' })} was filed automatically.`, () => showPastShift(shift.id), 20000, 'View');
+    return;
+  }
+  showShiftReport(shift, tally.tickets);
+  toast('Shift ended. The spike is clear.', () => {
+    tally.tickets.forEach(t => { delete t.archivedAt; delete t.shiftId; });
+    state.shifts = state.shifts.filter(x => x.id !== shift.id);
+    state.shiftStartedAt = prevStart;
+    save(); render();
+    if (spikeOpen) openSpike();
+  });
+}
+// The work day turns over at 4 AM, so a late night still belongs to the day before.
+const DAY_TURNOVER_H = 4;
+function workDayStart(ts) {
+  const d = new Date(ts); d.setHours(DAY_TURNOVER_H, 0, 0, 0);
+  if (d.getTime() > ts) d.setDate(d.getDate() - 1);
+  return d.getTime();
+}
+// Automatic End shift: the first time the app is open on a new work day, file the previous one.
+function autoEndShift() {
+  if (state.settings.autoEndShift !== 'newday' || state.active) return; // never mid-session
+  const cut = workDayStart(Date.now());
+  if (shiftStart() >= cut) return;
+  const t = shiftTally(cut, true);
+  if (t.tickets.length || t.sessions) return endShift(true);
+  if (state.shiftStartedAt && state.shiftStartedAt < cut) { state.shiftStartedAt = cut; save(); } // nothing to file: just start today fresh
+}
+
+function pastShiftTickets(shift) {
+  const ids = new Set(shift.ticketIds || []);
+  return state.tickets.filter(t => t.shiftId === shift.id || ids.has(t.id));
+}
+function showPastShifts() {
+  if (!spikeOpen) openSpike();
+  const list = [...state.shifts].sort((a, b) => b.endedAt - a.endedAt);
+  setSpikeArt(list.flatMap(sh => pastShiftTickets(sh).sort((a, b) => b.doneAt - a.doneAt)));
+  $('#spike-title').textContent = 'Past shifts';
+  $('#spike-end').innerHTML = '';
+  $('#shift-sofar').textContent = list.length ? `${list.length} ${list.length === 1 ? 'shift' : 'shifts'} on file` : '';
+  $('#spike-stack').innerHTML = list.length ? `<div class="past-shifts">${list.map(sh => {
+    const n = (sh.ticketIds || []).length;
+    return `<button class="past-shift" data-shift="${sh.id}">
+      <span class="when">${shiftWhen(sh.startedAt, sh.endedAt)}${sh.auto ? ' <i>ended automatically</i>' : ''}</span>
+      <span class="nums"><b>${fmtMin(sh.minutes || 0)}</b> worked<span>${n} spiked</span><span>${fmtPts(sh.points || 0)} pts</span></span>
+    </button>`;
+  }).join('')}</div>
+    <div class="shift-actions"><button class="btn" data-s="sample-back">Back to the spike</button></div>`
+    : '<p class="spike-empty">No shifts yet. When you press End shift, the report is kept here.</p><div class="shift-actions"><button class="btn" data-s="sample-back">Back to the spike</button></div>';
+  $('#spike-stack .past-shift, #spike-stack .shift-actions .btn')?.focus({ preventScroll: true });
+}
+function showPastShift(id) {
+  const sh = state.shifts.find(x => x.id === id);
+  if (!sh) return;
+  if (!spikeOpen) openSpike();
+  showShiftReport(sh, pastShiftTickets(sh), 'past');
+}
+
+function shiftWhen(a, b) {
+  const d = (ts, o) => new Date(ts).toLocaleString(undefined, o);
+  const sameDay = new Date(a).toDateString() === new Date(b).toDateString();
+  const time = { hour: 'numeric', minute: '2-digit' };
+  return sameDay
+    ? `${d(a, { weekday: 'short', month: 'short', day: 'numeric' })}, ${d(a, time)} to ${d(b, time)}`
+    : `${slipDate(a)} to ${slipDate(b)}`;
+}
+function showShiftReport(shift, tickets, sample) {
+  const by = shift.byTicket || tickets.map(t => ({ ticketId: t.id, name: t.name, sessions: 0, minutes: 0, points: 0, spiked: true }));
+  const past = sample === 'past'; if (past) sample = null;
+  setSpikeArt(tickets);
+  $('#spike-title').textContent = sample ? 'Sample shift report' : 'Shift report';
+  $('#spike-end').innerHTML = '';
+  $('#shift-sofar').textContent = '';
+  $('#spike-stack').innerHTML = `
+    <div class="shift-receipt">
+      ${sample ? '<p class="sample-stamp">Sample</p><p class="sample-note">When you press End shift, you get a receipt like this one. Nothing here is saved.</p><hr>' : ''}
+      <p class="when">${shiftWhen(shift.startedAt, shift.endedAt)}</p>
+      <hr>
+      ${by.length ? `
+      <div class="by-ticket">
+        <div class="lines head"><span>Ticket</span><span class="num">Time</span><span class="num">Pts</span></div>
+        ${by.map(r => `
+        <div class="lines${r.spiked ? ' spiked' : ''}">
+          <span class="name">${esc(r.name)}${r.spiked ? ' <i title="Spiked">&#10003;</i>' : ''}</span>
+          <span class="num">${r.sessions ? fmtMin(r.minutes) : '–'}</span>
+          <span class="num">${fmtPts(r.points)}</span>
+          ${r.sessions ? `<span class="sub">${r.sessions} ${r.sessions === 1 ? 'session' : 'sessions'}${shift.minutes ? `, ${Math.round((r.minutes / shift.minutes) * 100)}% of the shift` : ''}</span>` : ''}
+          ${r.sessions && shift.minutes ? `<span class="share"><i style="width:${Math.max(2, (r.minutes / shift.minutes) * 100)}%"></i></span>` : ''}
+        </div>`).join('')}
+      </div>
+      <p class="key">&#10003; spiked this shift</p>
+      <hr>` : ''}
+      <div class="lines">
+        <span>Tickets spiked</span><span></span><span class="num">${tickets.length}</span>
+        <span>Sessions</span><span></span><span class="num">${shift.sessions}</span>
+        <span>Time worked</span><span></span><span class="num">${fmtMin(shift.minutes)}</span>
+        ${shift.checkLabel && (shift.checked ?? shift.sessions) ? `<span>${esc(shift.checkLabel)}</span><span></span><span class="num">${shift.phoneFree} of ${shift.checked ?? shift.sessions}</span>` : ''}
+      </div>
+      <hr>
+      <div class="lines total"><span>Points earned</span><span></span><span class="num">${fmtPts(shift.points)}</span></div>
+      <p class="foot">${past ? `Filed ${slipDate(shift.endedAt)}${shift.auto ? ', automatically' : ''}.` : 'Board\'s clear. Tickets are archived, nothing is lost.'}</p>
+    </div>
+    <div class="shift-actions">${past ? '<button class="btn go" data-s="past">Back to past shifts</button>' : sample
+      ? `<button class="btn go" data-s="${sample === 'spike' ? 'sample-back' : 'close'}">${sample === 'spike' ? 'Back to the spike' : 'Back to the walkthrough'}</button>`
+      : '<button class="btn go" data-s="close">Start fresh</button>'}</div>`;
+  $('#spike-stack .shift-actions .btn')?.focus({ preventScroll: true });
+}
+// A made-up shift, so the walkthrough can show what End shift gives you without touching real data.
+function showSampleReport(from) {
+  const now = Date.now(), M = 60000, chk = avoid();
+  const byTicket = [
+    { name: 'Draft the project plan', sessions: 2, minutes: 45, points: 225, spiked: false },
+    { name: 'Send the weekly update', sessions: 1, minutes: 25, points: 100, spiked: true },
+    { name: 'Waiting on a reply from Sam', sessions: 1, minutes: 10, points: 50, spiked: false },
+    { name: 'Pick up groceries', sessions: 0, minutes: 0, points: 0, spiked: true },
+  ];
+  const shift = { startedAt: now - 210 * M, endedAt: now, sessions: 4, minutes: 80, points: 375,
+    phoneFree: 3, checked: 4, checkLabel: chk.on ? chk.clean : null, byTicket };
+  if (!spikeOpen) openSpike();
+  showShiftReport(shift, byTicket.filter(r => r.spiked), from);
+}
+function openSpike() {
+  setSpikeArt(null);
+  const list = spiked();
+  const view = $('#spike-view');
+  $('#spike-stack').innerHTML = list.length ? list.map((t, i) => {
+    const n = shownSessions().filter(x => x.ticketId === t.id).length;
+    return `<button class="spiked-slip" data-id="${t.id}" style="${slip(t.id)};--i:${Math.min(i, 14)}">
+      <span class="when">${slipDate(t.doneAt)}</span>
+      <b>${esc(t.name)}</b>
+      <span class="meta"><span class="area ${t.area}">${t.area === 'personal' ? 'Personal' : 'Work'}</span>${n ? `<span>${n} ${n === 1 ? 'session' : 'sessions'}</span>` : ''}</span>
+    </button>`;
+  }).join('') : '<p class="spike-empty">Nothing on the spike yet. When you finish a ticket, Spike it and it lands here.</p>';
+  $('#spike-title').textContent = 'On the spike';
+  const tally = shiftTally();
+  const any = list.length || tally.sessions;
+  $('#spike-end').innerHTML = (state.shifts.length ? '<button class="btn quiet" data-s="past">Past shifts</button>' : '') + (any ? '<button class="btn end-shift" data-s="end-shift">End shift</button>' : '');
+  $('#shift-sofar').textContent = any ? `This shift: ${list.length} spiked, ${fmtMin(tally.minutes)} worked, ${fmtPts(tally.points)} points` : '';
+  view.hidden = false;
+  spikeOpen = true;
+  requestAnimationFrame(() => requestAnimationFrame(() => view.classList.add('open')));
+  setTimeout(() => (view.querySelector('.spiked-slip') || view.querySelector('.spike-x'))?.focus({ preventScroll: true }), 80);
+}
+function closeSpike(toReview) {
+  const view = $('#spike-view');
+  spikeOpen = false;
+  setSpikeArt(null);
+  view.classList.remove('open');
+  if (toReview) { view.hidden = true; return; }
+  setTimeout(() => { if (!spikeOpen) view.hidden = true; }, reducedMotion() ? 0 : 220);
+  spikeBtn().focus({ preventScroll: true });
+}
+
+// ---------- focus flow ----------
+const F = { phase: null, ticketId: null, minutes: null, mode: 'open', last: null };
+let tickTimer = null;
+let audioCtx = null;
+
+function chime(kind) {
+  if (!state.settings.chime) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const notes = kind === 'end' ? [660, 880, 990] : [740];
+    notes.forEach((f, i) => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      const t0 = audioCtx.currentTime + i * 0.22;
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(kind === 'end' ? 0.22 : 0.12, t0 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.2);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(t0); o.stop(t0 + 1.25);
+    });
+  } catch {}
+}
+function notify(text) {
+  if (!state.settings.notify || !('Notification' in window) || Notification.permission !== 'granted') return;
+  if (!document.hidden) return;
+  try { new Notification('Yes, Chef', { body: text, silent: true }); } catch {}
+}
+
+function ticketById(id) { return state.tickets.find(t => t.id === id); }
+// Hold: a slip waits for a set time, then comes back on its own with an "Off hold" flag.
+// Internally t.ready means "off hold, your turn" and t.holdUntil is when the hold ends.
+const isHeld = (t) => !!t.holdUntil && t.holdUntil > Date.now();
+function holdLeft(t) { return clock(Math.ceil((t.holdUntil - Date.now()) / 1000)); }
+function slipTag(t) {
+  if (isHeld(t)) return `<span class="hold-tag" data-hold="${t.id}">Hold ${holdLeft(t)}</span>`;
+  if (t.ready) return '<span class="ready-tag">Off hold</span>';
+  return esc(typeName(t.type));
+}
+const holdLabel = (t) => (isHeld(t) ? 'End hold' : 'Hold');
+// Coming off hold puts a slip at the front (left) and slides the rail back to it.
+function comeOffHold(t) {
+  t.holdUntil = null;
+  t.ready = true;
+  t.order = frontOrder();
+}
+function toggleHold(id) {
+  const t = ticketById(id); if (!t) return;
+  if (isHeld(t)) { comeOffHold(t); save(); renderRail(); scrollRailToFront(); if (pickId === id) renderPick(); return; }
+  else {
+    t.holdUntil = Date.now() + (Number(state.settings.holdMinutes) || 2) * 60000;
+    t.ready = false;
+  }
+  save(); renderRail(); if (pickId === id) renderPick();
+}
+// Runs every second: updates countdowns and brings expired holds back.
+function holdTick() {
+  let changed = false;
+  for (const t of state.tickets) {
+    if (t.doneAt || !t.holdUntil || t.holdUntil > Date.now()) continue;
+    const justNow = Date.now() - t.holdUntil < 5000; // no chime for holds that ended while the app was closed
+    comeOffHold(t); changed = true;
+    if (justNow) { chime('mid'); notify(`Off hold: ${t.name}`); }
+  }
+  if (changed) { save(); renderRail(); scrollRailToFront(); if (pickId && !pickEdit && !inSession()) renderPick(); return; }
+  document.querySelectorAll('[data-hold]').forEach(el => {
+    const t = ticketById(el.dataset.hold);
+    if (t && isHeld(t)) el.textContent = `Hold ${holdLeft(t)}`;
+  });
+}
+const byRail = (a, b) => a.order - b.order; // left is the front of the line
+// The latest thing that happened goes to the front: starting a session, or coming off hold.
+function frontOrder() { return state.tickets.reduce((m, t) => Math.min(m, t.order ?? 0), 0) - 1; }
+function scrollRailToFront() { const el = $('#tickets'); if (el && el.scrollLeft > 0) el.scrollTo({ left: 0, behavior: 'smooth' }); }
+function nextOrder() { return state.tickets.reduce((m, t) => Math.max(m, t.order ?? -1), -1) + 1; }
+// Move a ticket next to another one, then renumber the whole line.
+function moveTicket(id, targetId, after) {
+  if (id === targetId) return;
+  const line = state.tickets.filter(t => !t.doneAt).sort(byRail);
+  const moving = line.find(t => t.id === id);
+  if (!moving) return;
+  line.splice(line.indexOf(moving), 1);
+  let at = line.findIndex(t => t.id === targetId);
+  if (at < 0) return;
+  if (after) at += 1;
+  line.splice(at, 0, moving);
+  line.forEach((t, i) => { t.order = i; });
+  save(); renderRail();
+}
+
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let pickId = null;
+let pickEdit = false;   // editing happens right on the slip, never in a second window
+let pickFocus = null;
+
+function openSetup(ticketId, opts = {}) {
+  const t = ticketById(ticketId);
+  if (!t) return;
+  pickEdit = !!opts.edit; pickFocus = opts.edit ? 'name' : null;
+  F.ticketId = ticketId; F.mode = 'open'; // open session is the default; pick a length for a timed burst
+  F.minutes = Number(state.settings.burstMinutes) || 15;
+  // warm up audio on this user gesture so the end chime can play later
+  try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume(); } catch {}
+  openPick(ticketId);
+}
+
+function cardFor(id) { return document.querySelector(`#tickets .ticket[data-id="${id}"]`); }
+function onScreen(r) { return r.width > 0 && r.bottom > 0 && r.right > 0 && r.top < innerHeight && r.left < innerWidth; }
+
+// Animate the slip between its spot on the rail and its spot in the middle of the screen.
+function flyFrom(card, hold) {
+  const from = card.getBoundingClientRect(), to = hold.getBoundingClientRect();
+  const k = from.width / to.width;
+  const dx = from.left + from.width / 2 - (to.left + to.width / 2);
+  const dy = from.top - to.top;
+  const tilt = getComputedStyle(card).getPropertyValue('--tilt').trim() || '0deg';
+  return `translate(${dx}px, ${dy}px) rotate(${tilt}) scale(${k})`;
+}
+
+function openPick(id) {
+  const pick = $('#pick'), hold = $('#slip-hold');
+  pickId = id;
+  renderPick();
+  pick.hidden = false;
+  hold.getAnimations().forEach(a => a.cancel());
+  const card = cardFor(id);
+  const fly = card && !reducedMotion() && onScreen(card.getBoundingClientRect());
+  if (fly) {
+    hold.style.transformOrigin = '50% 0';
+    const start = flyFrom(card, hold);
+    card.classList.add('lifted');
+    hold.animate(
+      [{ transform: start, opacity: 1 }, { transform: 'translateY(-14px) rotate(-1deg) scale(1.01)', offset: 0.78 }, { transform: 'none' }],
+      { duration: 700, easing: 'cubic-bezier(.22,.9,.24,1)' }
+    );
+  } else {
+    if (card) card.classList.add('lifted');
+    hold.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: reducedMotion() ? 1 : 360, easing: 'ease-out' });
+  }
+  requestAnimationFrame(() => requestAnimationFrame(() => pick.classList.add('open')));
+  setTimeout(() => (pickEdit ? focusEditField() : $('[data-p=start]', pick)?.focus({ preventScroll: true })), 60);
+}
+
+function closePick(animate = true) {
+  const pick = $('#pick'), hold = $('#slip-hold');
+  if (pick.hidden) return;
+  const id = pickId;
+  pickId = null; pickEdit = false;
+  const finish = () => {
+    pick.hidden = true;
+      hold.getAnimations().forEach(a => a.cancel());
+    document.querySelectorAll('.ticket.lifted').forEach(c => c.classList.remove('lifted'));
+    if (animate) cardFor(id)?.focus({ preventScroll: true });
+  };
+  pick.classList.remove('open');
+  const card = cardFor(id);
+  if (!animate || reducedMotion()) return finish();
+  if (card && onScreen(card.getBoundingClientRect())) {
+    card.classList.remove('lifted'); // measure without hiding, then hide again until we land
+    const end = flyFrom(card, hold);
+    card.classList.add('lifted');
+    hold.animate([{ transform: 'none' }, { transform: end }], { duration: 420, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards' })
+      .finished.then(finish).catch(finish);
+  } else {
+    hold.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(24px)' }], { duration: 220, fill: 'forwards' })
+      .finished.then(finish).catch(finish);
+  }
+}
+
+function spanText(a, b) {
+  const m = Math.max(0, Math.round((b - a) / 60000));
+  if (m < 60) return `${m} min`;
+  const h = Math.round(m / 60);
+  if (h < 48) return `${h} ${h === 1 ? 'hour' : 'hours'}`;
+  return `${Math.round(h / 24)} days`;
+}
+function slipDate(ts) {
+  return new Date(ts).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+
+// What a Yes was for: saved on the session, so old phone sessions still read "phone use" after you change the check.
+const slipNote = (x) => (x && x.avoided) || 'Phone use';
+function slipHistory(t) {
+  const done = shownSessions().filter(s => s.ticketId === t.id);
+  if (!done.length) return '<p class="muted" style="margin:0">No sessions on this yet.</p>';
+  const recent = done.slice(-7);
+  const mins = done.reduce((a, s) => a + (s.minutes ?? s.durationSec / 60), 0);
+  const pts = done.reduce((a, s) => a + s.points, 0);
+  return `
+    <div class="lines">
+      ${done.length > recent.length ? `<span class="muted">${done.length - recent.length} earlier</span><span></span><span></span>` : ''}
+      ${recent.map(s => `<span${s.phone ? ` class="phone" title="${esc(slipNote(s))}"` : ''}>${slipDate(s.endedAt)}${s.phone ? ' *' : ''}</span><span class="num">${fmtMin(s.minutes ?? s.durationSec / 60)}</span><span class="num">${fmtPts(s.points)}</span>`).join('')}
+    </div>
+    <hr>
+    <div class="lines total"><span>Total</span><span class="num">${fmtMin(mins)}</span><span class="num">${fmtPts(pts)}</span></div>
+    ${done.some(s => s.phone) ? `<p class="muted" style="margin:10px 0 0">* ${esc([...new Set(done.filter(s => s.phone).map(s => low(slipNote(s))))].join(', '))}</p>` : ''}`;
+}
+
+// On phones a stray tap is easy, so spiking takes two taps: the first turns the button into "Spike it?".
+const touchOnly = window.matchMedia('(hover: none)');
+const spikeNeedsConfirm = () => touchOnly.matches;
+let spikeConfirmTimer = null;
+function askSpikeConfirm(b) {
+  b.classList.add('confirm');
+  b.insertAdjacentHTML('beforeend', '<span>Spike it?</span>');
+  b.setAttribute('aria-label', 'Tap again to spike it');
+  clearTimeout(spikeConfirmTimer);
+  spikeConfirmTimer = setTimeout(() => { if (b.isConnected) { b.classList.remove('confirm'); b.querySelector('span')?.remove(); b.setAttribute('aria-label', 'Spike it'); } }, 4000);
+}
+function renderPick() {
+  const t = ticketById(pickId);
+  if (!t) return closePick(false);
+  const slip = $('#big-slip');
+  slip.classList.toggle('is-ready', !!t.ready && !pickEdit);
+  slip.classList.toggle('editing', pickEdit);
+  $('#pick').classList.toggle('editing', pickEdit);
+
+  if (pickEdit) {
+    slip.innerHTML = `
+      <form id="slip-form" autocomplete="off">
+        <div class="top">
+          <label class="sr-only" for="sf-type">Type</label>
+          <select id="sf-type" class="slip-select">${slipTypes().map(x => `<option value="${esc(x.id)}" ${t.type === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+          <span>${age(t.createdAt)} on the rail</span>
+        </div>
+        <label class="sr-only" for="sf-name">Name</label>
+        <textarea id="sf-name" class="slip-field slip-name" rows="2" maxlength="120" required>${esc(t.name)}</textarea>
+        <label class="sr-only" for="sf-note">Note</label>
+        <textarea id="sf-note" class="slip-field slip-note" rows="3" placeholder="Where I left off, or what I'm waiting for">${esc(t.note || '')}</textarea>
+        <div class="slip-area" role="radiogroup" aria-label="Area">
+          <label class="area work"><input type="radio" name="sf-area" value="work" ${t.area !== 'personal' ? 'checked' : ''}> Work</label>
+          <label class="area personal"><input type="radio" name="sf-area" value="personal" ${t.area === 'personal' ? 'checked' : ''}> Personal</label>
+        </div>
+        <div class="row">
+          <button class="btn solid" type="submit">Save</button>
+          <button class="btn" type="button" data-p="cancel-edit">Cancel</button>
+        </div>
+        <p class="muted hint">Enter saves. Esc cancels.</p>
+      </form>`;
+  } else if (inSession()) {
+    const a = state.active;
+    const running = a && a.phase === 'running';
+    slip.innerHTML = `
+      <div class="top"><span>${running ? '<span class="ready-tag">On the line</span>' : esc(typeName(t.type))}</span><span>${a ? 'Started ' + new Date(a.startedAt).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }) : ''}</span></div>
+      <h2 id="pick-title">${esc(t.name)}</h2>
+      <label class="sr-only" for="sf-live-note">Note</label>
+      <textarea id="sf-live-note" class="slip-field slip-note live-note" rows="2" placeholder="Jot where you are, so you can pick it right back up">${esc(t.note || '')}</textarea>
+      <span class="area ${t.area}">${t.area === 'personal' ? 'Personal' : 'Work'}</span>
+      ${running && a.mode === 'burst' ? '<div class="tear" aria-hidden="true"><i id="tear-fill"></i></div>' : '<div class="tear plain" aria-hidden="true"></div>'}
+      <div class="history">${slipHistory(t)}</div>
+      <p class="foot">Added ${slipDate(t.createdAt)}</p>`;
+    slip.querySelectorAll('textarea').forEach(fitField);
+    $('#pick-panel').inert = true;
+    return;
+  } else if (t.doneAt) {
+    slip.innerHTML = `
+      <div class="top"><span class="spiked-tag">Spiked</span><span>${slipDate(t.doneAt)}</span></div>
+      <h2 id="pick-title">${esc(t.name)}</h2>
+      ${t.note ? `<p class="note">${esc(t.note)}</p>` : ''}
+      <span class="area ${t.area}">${t.area === 'personal' ? 'Personal' : 'Work'}</span>
+      <div class="row"><span class="muted">${esc(typeName(t.type))}, on the rail for ${spanText(t.createdAt, t.doneAt)}</span></div>
+      <div class="history">${slipHistory(t)}</div>
+      <p class="foot">Added ${slipDate(t.createdAt)}</p>`;
+  } else {
+    slip.innerHTML = `
+      <div class="top"><span>${slipTag(t)}</span><span>${age(t.createdAt)} on the rail</span></div>
+      <div class="title-row">
+        <h2 id="pick-title" class="tap" data-p="edit-name" title="Click to edit">${esc(t.name)}</h2>
+        <button class="btn icon-btn" type="button" data-p="edit" aria-label="Edit slip" data-tip="Edit"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>
+      </div>
+      ${t.note
+        ? `<p class="note tap" data-p="edit-note" title="Click to edit">${esc(t.note)}</p>`
+        : `<p class="note add-note tap" data-p="edit-note">Add a note</p>`}
+      <span class="area ${t.area}">${t.area === 'personal' ? 'Personal' : 'Work'}</span>
+      <div class="row">
+        <button class="btn" data-p="hold">${holdLabel(t)}</button>
+        <button class="btn icon-btn spike-btn" data-p="spike" aria-label="Spike it" data-tip="Spike it"><svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 14.6V25.5" stroke-width="2.2"/><path d="M9 11.2 22.8 9.6 24 19.3l-1.85 1.05-1.85-.95-1.85 1.05-1.85-.95-1.85 1.05-1.85-.95-1.85 1.05-1.85-.95z" fill="var(--receipt)" stroke-width="1.6"/><path d="M11.6 14.4l2.8-.32M18.2 13.65l3-.34M12.3 17.2l6.8-.75" stroke-width="1.1" opacity=".55"/><path d="M16 3.5V14.6" stroke-width="2.2"/><ellipse cx="16" cy="27" rx="8.5" ry="2.4" fill="currentColor" stroke="none" opacity=".85"/></svg></button>
+      </div>
+      <div class="history">${slipHistory(t)}</div>
+      <p class="foot">Added ${slipDate(t.createdAt)}</p>`;
+  }
+
+  if (t.doneAt) {
+    $('#pick-panel').innerHTML = `
+      <h2>On the spike</h2>
+      <p class="sub">Finished ${slipDate(t.doneAt)}. Not really done? Put it back and it goes to the front of the rail.</p>
+      <div class="actions"><button class="btn go" data-p="unspike">Put back on the rail</button></div>
+      <div class="more"><button class="btn quiet" data-p="to-spike">Back to the spike</button><button class="btn quiet" data-p="close">Close</button></div>`;
+    $('#pick-panel').inert = false;
+    return;
+  }
+
+  const lens = [10, 15, 25, 45];
+  $('#pick-panel').innerHTML = `
+    <h2>How long?</h2>
+    <div class="lengths" role="group" aria-label="Session length">
+      ${lens.map(m => `<button data-len="${m}" aria-pressed="${F.mode === 'burst' && F.minutes === m}">${m} min</button>`).join('')}
+      <label class="sr-only" for="custom-len">Custom minutes</label>
+      <input id="custom-len" type="number" min="2" max="240" placeholder="min" value="${F.mode === 'burst' && !lens.includes(F.minutes) ? F.minutes : ''}">
+      <button data-len="open" aria-pressed="${F.mode === 'open'}">Open, no timer</button>
+    </div>
+    <p class="sub">${F.mode === 'open' ? 'Counts up until you stop.' : `${F.minutes} minutes, with a soft chime halfway.`}</p>
+    <div class="actions"><button class="btn go" data-p="start">Start work</button><button class="btn quiet" data-p="close">Back to the rail</button></div>`;
+  $('#pick-panel').inert = pickEdit;
+  slip.querySelectorAll('textarea').forEach(fitField);
+}
+
+function fitField(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+function focusEditField() {
+  const el = pickFocus === 'note' ? $('#sf-note') : $('#sf-name');
+  if (!el) return;
+  el.focus({ preventScroll: true });
+  el.setSelectionRange(el.value.length, el.value.length);
+}
+function enterEdit(field) {
+  pickEdit = true; pickFocus = field || 'name';
+  renderPick(); focusEditField();
+}
+function saveEdit() {
+  const t = ticketById(pickId); if (!t) return;
+  const name = $('#sf-name').value.trim();
+  if (!name) { $('#sf-name').focus(); return; }
+  t.name = name;
+  t.type = $('#sf-type').value;
+  t.area = document.querySelector('input[name="sf-area"]:checked')?.value || t.area;
+  t.note = $('#sf-note').value.trim();
+  pickEdit = false;
+  save(); render(); renderPick();
+  $('[data-p=start]')?.focus({ preventScroll: true });
+}
+function cancelEdit() {
+  pickEdit = false; renderPick();
+  $('[data-p=start]')?.focus({ preventScroll: true });
+}
+
+// The slip stays on screen while you work; the timer takes the right side.
+const wide = () => window.matchMedia('(min-width: 761px)').matches;
+const inSession = () => !!pickId && (state.active?.ticketId === pickId || (F.phase === 'result' && F.last?.ticketId === pickId));
+
+function startSession() {
+  const t = ticketById(F.ticketId);
+  if (!t) { closePick(false); return closeFocus(); }
+  if (!pickId) openPick(t.id);
+  pickEdit = false;
+  t.holdUntil = null;
+  t.order = frontOrder();
+  $('#tickets').scrollLeft = 0;
+  state.active = {
+    ticketId: t.id, ticketName: t.name, area: t.area,
+    mode: F.mode, minutes: F.mode === 'burst' ? F.minutes : null,
+    startedAt: Date.now(), midChimed: false, phase: 'running', endedAt: null,
+  };
+  if (state.settings.notify && 'Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  save(true);
+  renderPick();
+  renderFocus();
+}
+// After a reload mid-session, put the slip and timer back where they were.
+function resumeSession() {
+  const a = state.active;
+  if (!a) return;
+  F.ticketId = a.ticketId;
+  if (ticketById(a.ticketId) && !pickId) openPick(a.ticketId);
+  renderPick();
+  renderFocus();
+}
+
+// Drop an accidental start (a few seconds) without logging it, and go back to the slip's length choices.
+function discardSession() {
+  const a = state.active;
+  state.active = null;
+  save(true);
+  if (a) sessionAgain(a.ticketId); else closeFocus();
+  toast('Just a few seconds, so it wasn\'t logged.', null, 4000);
+}
+const TINY_MIN = 0.05; // 3 seconds: an accidental start/stop
+function sessionRecord(a, minutes, phone) {
+  const s = {
+    id: uid(), ticketId: a.ticketId, ticketName: a.ticketName, area: a.area, mode: a.mode,
+    startedAt: a.startedAt, endedAt: a.endedAt, durationSec: Math.round((a.endedAt - a.startedAt) / 1000),
+    minutes: Math.round(minutes * 100) / 100,
+    phone, points: pointsFor(phone, minutes), cutPct: phone ? Number(state.settings.phoneCutPct) || 0 : 0,
+  };
+  const chk = avoid();
+  if (!chk.on) s.checked = false; else s.avoided = chk.slip;
+  return s;
+}
+// A session shorter than the minimum: save it (hidden), skip the check, and go back to the slip.
+function logHidden(a, minutes) {
+  const s = sessionRecord(a, minutes, false);
+  s.checked = false; s.quick = true; delete s.avoided; // never asked, so it doesn't count toward or against a streak
+  state.sessions.push(s);
+  state.active = null;
+  save(true); render();
+  sessionAgain(a.ticketId);
+  toast(`Under ${minText()}, so it's saved but hidden. Show short sessions in Settings.`, () => {
+    state.sessions = state.sessions.filter(x => x.id !== s.id); save(); render();
+  }, 6000);
+}
+function endSession(auto) {
+  const a = state.active;
+  if (!a || a.phase !== 'running') return;
+  if (!auto) {
+    const m = (Date.now() - a.startedAt) / 60000;
+    if (m < TINY_MIN) return discardSession();
+    if (m < minSession()) { a.endedAt = Date.now(); return logHidden(a, m); }
+  }
+  a.phase = 'check';
+  a.endedAt = auto ? a.startedAt + a.minutes * 60000 : Date.now();
+  if (auto) { chime('end'); notify(`Burst done: ${a.ticketName}`); }
+  save(true);
+  if (pickId) renderPick();
+  renderFocus();
+}
+
+function cancelSession() {
+  state.active = null;
+  save(true);
+  closeFocus();
+  toast('Session cancelled. No points logged.');
+}
+
+function answerPhone(phone) {
+  const a = state.active;
+  if (!a || a.phase !== 'check') return;
+  const minutes = creditedMinutes(a);
+  if (minutes < TINY_MIN) return discardSession();
+  if (minutes < minSession()) return logHidden(a, minutes); // lowered the minutes below the minimum on the check screen
+  const s = sessionRecord(a, minutes, phone);
+  state.sessions.push(s);
+  const worked = ticketById(a.ticketId);
+  if (worked) { worked.ready = false; worked.holdUntil = null; } // stays at the front
+  state.active = null;
+  F.phase = 'result'; F.ticketId = a.ticketId; F.last = s;
+  save(true);
+  render();
+  if (pickId) renderPick();
+  renderFocus();
+}
+
+function closeFocus() {
+  F.phase = null; F.last = null;
+  clearInterval(tickTimer); tickTimer = null;
+  document.title = 'Yes, Chef';
+  const el = $('#focus');
+  el.hidden = true; el.classList.remove('docked');
+  $('#pick').classList.remove('in-session');
+  if (pickId) closePick();
+  render();
+}
+// "Another session on this": stay on the slip and bring back the length choices.
+function sessionAgain(id) {
+  F.phase = null; F.last = null;
+  clearInterval(tickTimer); tickTimer = null;
+  const el = $('#focus');
+  el.hidden = true; el.classList.remove('docked');
+  $('#pick').classList.remove('in-session');
+  document.title = 'Yes, Chef';
+  if (pickId === id) { F.ticketId = id; F.mode = 'open'; F.minutes = Number(state.settings.burstMinutes) || 15; renderPick(); $('[data-p=start]')?.focus({ preventScroll: true }); }
+  else openSetup(id);
+}
+
+function renderFocus() {
+  const el = $('#focus');
+  clearInterval(tickTimer); tickTimer = null;
+  const a = state.active;
+  const phase = a ? a.phase : F.phase;
+  if (!phase) { el.hidden = true; el.classList.remove('docked'); return; }
+  el.hidden = false;
+  const docked = !!pickId && wide();
+  el.classList.toggle('docked', docked);
+  $('#pick').classList.toggle('in-session', !!pickId);
+
+  if (phase === 'running') {
+    const isBurst = a.mode === 'burst';
+    el.innerHTML = `
+      <div class="crumb"><span>${isBurst ? `${a.minutes}-minute burst` : 'Open session'}</span><button class="btn quiet" data-f="cancel">Cancel session</button></div>
+      <div class="stage">
+        <h2 class="task">${esc(a.ticketName)}</h2>
+        <p class="clock" id="clock"></p>
+        <p class="sub" id="clock-sub"></p>
+        <div class="actions"><button class="btn solid" data-f="end">End work</button></div>
+      </div><div></div>`;
+    const tick = () => {
+      const elapsed = (Date.now() - a.startedAt) / 1000;
+      let shown;
+      if (isBurst) {
+        const total = a.minutes * 60, left = total - elapsed;
+        if (!a.midChimed && elapsed >= total / 2 && total >= 120) { a.midChimed = true; chime('mid'); save(); }
+        if (left <= 0) return endSession(true);
+        shown = clock(left);
+        const fill = $('#tear-fill'); if (fill) fill.style.width = Math.min(100, (elapsed / total) * 100) + '%';
+        $('#clock-sub').textContent = elapsed < total / 2 ? 'Stay with this one thing.' : 'Past halfway.';
+      } else {
+        shown = clock(elapsed);
+        $('#clock-sub').textContent = 'Counting up. End it whenever you stop.';
+      }
+      $('#clock').textContent = shown;
+      document.title = `${shown} ${a.ticketName}`;
+    };
+    tick();
+    tickTimer = setInterval(tick, 250);
+    return;
+  }
+
+  if (phase === 'check') {
+    const actual = Math.ceil(actualMinutes(a));
+    const m = creditedMinutes(a);
+    const chk = avoid();
+    el.innerHTML = `
+      <div class="crumb"><span>${esc(a.ticketName)}</span><span></span></div>
+      <div class="stage">
+        ${chk.on ? `<h2 class="ask">${esc(chk.ask)}</h2>
+        <div class="answer">
+          <button class="no" data-f="no">No</button>
+          <button class="yes" data-f="yes">Yes</button>
+        </div>` : `<h2 class="ask">Nice work. Log it?</h2>
+        <div class="answer">
+          <button class="no" data-f="no">Log it</button>
+        </div>`}
+        <p class="sub" style="margin-top:20px" id="check-preview">${checkPreview(m)}</p>
+        <label class="worked">Minutes worked
+          <input id="worked-min" type="number" min="0" max="${actual}" step="1" value="${Math.round(m)}">
+        </label>
+        <p class="sub" style="font-size:15px">Forgot to stop the clock? Lower the minutes ${chk.on ? 'before you answer' : 'first'}. ${minSession() ? `Under ${minText()} is saved but hidden.` : ''}</p>
+      </div><div></div>`;
+    document.title = chk.on ? chk.ask : 'Log it?';
+    $('[data-f=no]', el).focus();
+    return;
+  }
+
+  if (phase === 'result') {
+    const s = F.last, t = ticketById(s.ticketId);
+    const nx = nextReward(), b = balance();
+    const pct = nx ? nx.pct : 0;
+    const lost = pointsFor(false, s.minutes ?? 0) - s.points;
+    el.innerHTML = `
+      <div class="crumb"><span>${esc(s.ticketName)}</span><span></span></div>
+      <div class="stage">
+        <p class="earned${s.phone ? ' cut' : ''}">+${fmtPts(s.points)}</p>
+        <p class="sub" style="margin:0 0 6px">${fmtMin(s.minutes ?? s.durationSec / 60)} of work.</p>
+        <p class="sub">${!wasChecked(s) ? 'Logged.' : s.phone
+          ? `${esc(slipNote(s))} cost ${fmtPts(lost)} points this time. Logging it still counts.`
+          : `${esc(avoid().on ? avoid().clean : 'Clean')}. Your streak is ${streak()} ${streak() === 1 ? 'session' : 'sessions'}.`}</p>
+        <p class="sub" style="margin:0">${nx ? `${fmtPts(nx.toGo)} points to the next ${esc(nx.name)}.` : ''}</p>
+        <div class="meter"><i style="width:${pct}%"></i></div>
+        <div class="actions">
+          ${t && !t.doneAt ? '<button class="btn go" data-f="again">Another session on this</button><button class="btn" data-f="done">Spike it</button>' : ''}
+          <button class="btn solid" data-f="back">Back to the rail</button>
+        </div>
+      </div><div></div>`;
+    document.title = 'Yes, Chef';
+    $('[data-f=back]', el).focus();
+  }
+}
+
+// ---------- tickets ----------
+function addTicket(name, type, area) {
+  state.tickets.push({ id: uid(), name, type, area, note: '', ready: false, holdUntil: null, createdAt: Date.now(), doneAt: null, order: nextOrder() });
+  save(); render();
+}
+// Finished tickets go on the spike. Nothing is thrown away.
+function spikeTicket(id) {
+  const t = ticketById(id); if (!t) return;
+  t.doneAt = Date.now();
+  t.holdUntil = null; t.ready = false;
+  save(); render();
+  toast(`Spiked: ${t.name}`, () => { t.doneAt = null; save(); render(); });
+}
+function unspike(id) {
+  const t = ticketById(id); if (!t) return;
+  t.doneAt = null;
+  t.order = frontOrder();
+  save(); render(); scrollRailToFront();
+  toast(`Back on the rail: ${t.name}`, () => { t.doneAt = Date.now(); save(); render(); });
+}
+
+// ---------- rewards ----------
+function renderRewards() {
+  const b = balance();
+  $('#r-balance').textContent = fmtPts(b) + ' points earned';
+  const rate = Number(state.settings.pointsPerMinute) || 0;
+  $('#r-rate').textContent = rate ? `At ${fmtPts(rate)} points a minute, 100 points is about ${ptsTime(100)} of focused work.` : '';
+  const sorted = [...state.rewards].sort((a, z) => a.price - z.price);
+  $('#r-list').innerHTML = sorted.length ? sorted.map(r => {
+    const st = rewardStatus(r, b);
+    return `
+    <div class="reward${st.ready ? ' is-ready' : ''}" data-id="${r.id}">
+      <div>
+        <div class="name">${esc(r.name)}</div>
+        <div class="price">Every ${fmtPts(r.price)} points, about ${ptsTime(r.price)} of focused work${st.claimed ? `. Claimed ${st.claimed} ${st.claimed === 1 ? 'time' : 'times'}` : ''}</div>
+        <div class="price">${st.ready ? `<strong>${st.ready > 1 ? `${st.ready} ready to claim` : 'Ready to claim'}</strong>` : `Next at ${fmtPts(st.nextAt)}: ${fmtPts(st.toGo)} to go, about ${ptsTime(st.toGo)} of work`}</div>
+      </div>
+      <div class="acts">
+        <button class="btn solid" data-r="claim" ${st.ready ? '' : 'disabled'}>Claim</button>
+        <button class="btn quiet" data-r="edit">Edit</button>
+      </div>
+      <div class="meter"><i style="width:${st.ready ? 100 : st.pct}%"></i></div>
+    </div>`;
+  }).join('') : '<p class="hint">No rewards yet. Add something you want, and how many points it takes to earn it.</p>';
+
+  // weekly clean share, last 6 weeks (hidden when the check is off)
+  const chk = avoid();
+  $('#r-weeks-title').hidden = $('#r-weeks').hidden = !chk.on;
+  if (chk.on) $('#r-weeks-title').textContent = `${chk.clean} sessions by week`;
+  const thisWeek = startOfWeek(Date.now());
+  const weeks = [];
+  for (let i = 5; i >= 0; i--) {
+    const start = thisWeek - i * 7 * 864e5;
+    const end = start + 7 * 864e5;
+    const ss = liveSessions().filter(s => s.endedAt >= start && s.endedAt < end && wasChecked(s));
+    const free = ss.filter(s => !s.phone).length;
+    weeks.push({ start, n: ss.length, pct: ss.length ? Math.round((free / ss.length) * 100) : 0 });
+  }
+  $('#r-weeks').innerHTML = weeks.map(w => `
+    <div class="week" title="${w.n} sessions">
+      <div class="col"><i style="height:${w.pct}%"></i></div>
+      <b>${w.n ? w.pct + '%' : '–'}</b>
+      <span>${new Date(w.start).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+    </div>`).join('');
+
+  const hist = [...state.purchases].reverse().slice(0, 8);
+  $('#r-history').innerHTML = hist.length
+    ? hist.map(p => `<li>${esc(p.name)}, ${new Date(p.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</li>`).join('')
+    : '<li>Nothing yet.</li>';
+}
+
+// ---------- events ----------
+function wire() {
+  bannerEl = $('#banner');
+
+  // open the add box while it has focus or text; fold it back when it's empty and you've moved on
+  const addForm = $('#add-form'), addName = $('#add-name');
+  const syncAdd = () => addForm.classList.toggle('open', addForm.contains(document.activeElement) || addName.value.trim() !== '');
+  addForm.addEventListener('focusin', syncAdd);
+  addForm.addEventListener('focusout', () => setTimeout(syncAdd, 0));
+  addName.addEventListener('input', syncAdd);
+  addName.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !addName.value) addName.blur(); });
+  const shortAdd = matchMedia('(max-width: 760px)');
+  const placeAdd = () => { addName.placeholder = shortAdd.matches ? 'Add a slip…' : 'Add a slip: something you\'re working on or waiting on'; };
+  placeAdd(); shortAdd.addEventListener?.('change', placeAdd);
+  $('#add-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = $('#add-name').value.trim();
+    if (!name) { $('#add-name').focus(); return; }
+    addTicket(name, $('#add-type').value, $('#add-area').value);
+    $('#add-name').value = '';
+    $('#add-type').value = slipTypes()[0].id;
+    $('#add-name').focus();
+  });
+
+  $('#filter').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    filter = b.dataset.f; lsSet('focus-filter', filter);
+    if (filter !== 'all') $('#add-area').value = filter;
+    renderRail();
+  });
+
+  $('#tickets').addEventListener('click', (e) => {
+    const card = e.target.closest('.ticket'); if (!card) return;
+    const id = card.dataset.id;
+    const act = e.target.closest('[data-act]')?.dataset.act;
+    if (act === 'hold') return toggleHold(id);
+    openSetup(id); // Start button or anywhere else on the ticket
+  });
+  $('#tickets').addEventListener('keydown', (e) => {
+    if (!e.target.classList.contains('ticket')) return;
+    const id = e.target.dataset.id;
+    if (e.key === 'Enter') return openSetup(id);
+    if (e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      e.preventDefault();
+      const cards = [...document.querySelectorAll('#tickets .ticket')];
+      const i = cards.findIndex(c => c.dataset.id === id);
+      const j = e.key === 'ArrowLeft' ? i - 1 : i + 1;
+      if (j < 0 || j >= cards.length) return;
+      moveTicket(id, cards[j].dataset.id, e.key === 'ArrowRight');
+      document.querySelector(`#tickets .ticket[data-id="${id}"]`)?.focus();
+    }
+  });
+
+  // sliding the rail
+  $('#tickets').addEventListener('scroll', () => updateRailEdges(), { passive: true });
+  window.addEventListener('resize', () => { updateRailEdges(); placeTour(); });
+  let railSettle = null;
+  $('#tickets').addEventListener('scroll', () => {
+    if (!tourOn()) return;
+    railScrolledAt = Date.now(); placeTour();
+    clearTimeout(railSettle); railSettle = setTimeout(placeTour, 380); // show the tip as soon as the rail stops
+  }, { passive: true });
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('[data-tour]')?.dataset.tour;
+    if (!a) return;
+    if (a === 'next') { tourStep = Math.min(tourStep + 1, TOUR.length - 1); return placeTour(); }
+    if (a === 'sample') return showSampleReport('rail');
+    if (a === 'sample-spike') { tourSampleSeen = true; return showSampleReport('spike'); }
+    if (a === 'side-back') {
+      // close the view and return to the step they were on; Next on the rail is what moves the walkthrough on
+      SIDE_NEXT[e.target.closest('[data-ctx]').dataset.ctx]?.();
+      return placeTour();
+    }
+    if (a === 'seen') { tourSeen.add(e.target.closest('[data-ctx]').dataset.ctx); return placeTour(); }
+    if (a === 'end') return endTour();
+    if (a === 'clear') return clearPractice();
+  });
+  $('#setup-form').addEventListener('submit', (e) => { e.preventDefault(); finishSetup(false); });
+  $('#setup').addEventListener('click', (e) => { if (e.target.closest('[data-setup=skip]')) finishSetup(true); });
+  $('#setup-rewards').addEventListener('input', (e) => {
+    const id = e.target.dataset.rp; if (!id) return;
+    const v = Number(e.target.value); document.querySelector(`[data-pt="${id}"]`).textContent = v > 0 ? `≈ ${ptsTime(v)}` : '';
+  });
+  $('#setup-check').addEventListener('change', () => {
+    const custom = document.querySelector('[name=setup-check]:checked')?.value === 'custom';
+    $('#setup-custom').hidden = !custom; if (custom) $('#setup-ask').focus();
+  });
+  $('#s-export').addEventListener('click', () => { downloadBoard(); toast('Backup downloaded.', null, 4000); });
+  $('#s-import').addEventListener('click', () => { $('#s-import-file').value = ''; $('#s-import-file').click(); });
+  $('#s-import-file').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; if (f) readImport(f); });
+  $('#settings-dlg').addEventListener('close', () => { $('#s-import-confirm').hidden = true; $('#s-import-confirm').innerHTML = ''; });
+  $('#s-tour').addEventListener('click', () => {
+    $('#settings-dlg').close();
+    if (filter !== 'all') { filter = 'all'; lsSet('focus-filter', filter); }
+    addPractice(); save(); render();
+    $('#tickets').scrollTo({ left: 0 });
+    startTour();
+  });
+  $('#rail-prev').addEventListener('click', () => slideRail(-1));
+  $('#rail-next').addEventListener('click', () => slideRail(1));
+  // a normal mouse wheel slides the rail sideways when it has more slips than fit
+  $('#tickets').addEventListener('wheel', (e) => {
+    const el = e.currentTarget;
+    if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    if (el.scrollWidth <= el.clientWidth) return;
+    e.preventDefault();
+    el.scrollBy({ left: e.deltaY, behavior: 'auto' });
+  }, { passive: false });
+
+  // drag to reorder
+  let dragId = null;
+  const clearMarks = () => document.querySelectorAll('.drop-before, .drop-after').forEach(el => el.classList.remove('drop-before', 'drop-after'));
+  const dropSide = (card, x) => { const r = card.getBoundingClientRect(); return x > r.left + r.width / 2; };
+  $('#tickets').addEventListener('dragstart', (e) => {
+    const card = e.target.closest('.ticket'); if (!card) return;
+    dragId = card.dataset.id;
+    card.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', dragId); } catch {}
+  });
+  $('#tickets').addEventListener('dragover', (e) => {
+    if (!dragId) return;
+    const r = e.currentTarget.getBoundingClientRect(), edge = 70;
+    if (e.clientX < r.left + edge) e.currentTarget.scrollBy({ left: -18, behavior: 'auto' });
+    else if (e.clientX > r.right - edge) e.currentTarget.scrollBy({ left: 18, behavior: 'auto' });
+    const card = e.target.closest('.ticket');
+    e.preventDefault();
+    clearMarks();
+    if (!card || card.dataset.id === dragId) return;
+    card.classList.add(dropSide(card, e.clientX) ? 'drop-after' : 'drop-before');
+  });
+  $('#tickets').addEventListener('drop', (e) => {
+    e.preventDefault();
+    const card = e.target.closest('.ticket');
+    const id = dragId; dragId = null; clearMarks();
+    if (card && id) moveTicket(id, card.dataset.id, dropSide(card, e.clientX));
+  });
+  $('#tickets').addEventListener('dragend', () => { dragId = null; clearMarks(); document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging')); });
+
+  $('#focus').addEventListener('click', (e) => {
+    const f = e.target.closest('[data-f]')?.dataset.f;
+    if (!f) return;
+    if (f === 'back') return closeFocus();
+    if (f === 'start') return startSession();
+    if (f === 'end') return endSession(false);
+    if (f === 'cancel') return cancelSession();
+    if (f === 'no') return answerPhone(false);
+    if (f === 'yes') return answerPhone(true);
+    if (f === 'again') return sessionAgain(F.ticketId);
+    if (f === 'done') { const id = F.ticketId; closeFocus(); return spikeTicket(id); }
+  });
+  $('#focus').addEventListener('input', (e) => {
+    if (e.target.id !== 'worked-min' || !state.active) return;
+    const v = Number(e.target.value);
+    if (!(v >= 0)) return;
+    state.active.creditMin = v;
+    $('#check-preview').textContent = checkPreview(creditedMinutes(state.active));
+    save();
+  });
+  // the lifted ticket
+  $('#pick').addEventListener('click', (e) => {
+    const len = e.target.closest('[data-len]');
+    if (len) {
+      if (len.dataset.len === 'open') F.mode = 'open';
+      else { F.mode = 'burst'; F.minutes = Number(len.dataset.len); }
+      renderPick();
+      return $(`#pick [data-len="${len.dataset.len}"]`)?.focus();
+    }
+    const p = e.target.closest('[data-p]')?.dataset.p;
+    if (p === 'close') { if ($('#pick').classList.contains('in-session')) return; if (pickEdit) return cancelEdit(); const back = ticketById(pickId)?.doneAt; closePick(!back); return back ? openSpike() : undefined; }
+    if (p === 'start') return startSession();
+    if (p === 'hold') return toggleHold(pickId);
+    if (p === 'edit' || p === 'edit-name') return enterEdit('name');
+    if (p === 'edit-note') return enterEdit('note');
+    if (p === 'cancel-edit') return cancelEdit();
+    if (p === 'spike') {
+      const b = e.target.closest('[data-p]');
+      if (spikeNeedsConfirm() && !b.classList.contains('confirm')) return askSpikeConfirm(b);
+      const id = pickId; closePick(false); return spikeTicket(id);
+    }
+    if (p === 'unspike') { const id = pickId; closePick(false); return unspike(id); }
+    if (p === 'to-spike') { closePick(false); return openSpike(); }
+  });
+  $('#pick').addEventListener('submit', (e) => { e.preventDefault(); saveEdit(); });
+  $('#pick').addEventListener('input', (e) => {
+    if (e.target.matches('#big-slip textarea')) fitField(e.target);
+    if (e.target.id === 'sf-live-note') { const t = ticketById(pickId); if (t) { t.note = e.target.value.trim(); save(); } }
+  });
+  $('#pick').addEventListener('focusout', (e) => { if (e.target.id === 'sf-live-note') renderRail(); });
+  $('#pick').addEventListener('change', (e) => {
+    if (e.target.id === 'custom-len') {
+      const v = Math.round(Number(e.target.value));
+      if (v >= 2 && v <= 240) { F.mode = 'burst'; F.minutes = v; renderPick(); }
+    }
+  });
+  $('#pick').addEventListener('keydown', (e) => {
+    if (pickEdit && e.target.closest('#slip-form')) {
+      const plainEnter = e.key === 'Enter' && !e.shiftKey && e.target.id === 'sf-name';
+      if (plainEnter || (e.key === 'Enter' && (e.metaKey || e.ctrlKey))) { e.preventDefault(); return saveEdit(); }
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); return cancelEdit(); }
+    }
+    if (e.target.id === 'custom-len' && e.key === 'Enter') {
+      e.preventDefault();
+      const v = Math.round(Number(e.target.value));
+      if (v >= 2 && v <= 240) { F.mode = 'burst'; F.minutes = v; startSession(); }
+    }
+  });
+
+  // rewards
+  $('#open-rewards').addEventListener('click', () => { renderRewards(); $('#rewards-dlg').showModal(); });
+  $('#rewards-dlg').addEventListener('click', (e) => {
+    if (e.target.closest('[data-close]') || e.target === $('#rewards-dlg')) return $('#rewards-dlg').close();
+    const btn = e.target.closest('[data-r]'); if (!btn) return;
+    const id = btn.closest('.reward').dataset.id;
+    const r = state.rewards.find(x => x.id === id); if (!r) return;
+    if (btn.dataset.r === 'claim') {
+      if (!rewardStatus(r).ready) return;
+      const p = { id: uid(), rewardId: r.id, name: r.name, price: r.price, at: Date.now() };
+      state.purchases.push(p);
+      save(); render(); renderRewards();
+      toast(`Claimed: ${r.name}. Enjoy it.`, () => {
+        state.purchases = state.purchases.filter(x => x.id !== p.id); save(); render(); renderRewards();
+      });
+    }
+    if (btn.dataset.r === 'edit') {
+      const row = btn.closest('.reward');
+      row.innerHTML = `
+        <form class="inline-form" style="grid-column:1/-1;margin:0" data-edit="${r.id}">
+          <input name="name" value="${esc(r.name)}" required maxlength="80" aria-label="Reward name">
+          <input name="price" type="number" min="1" step="1" value="${r.price}" required aria-label="Price in points">
+          <select name="size" aria-label="Size">${Object.entries(SIZE_LABEL).map(([k, v]) => `<option value="${k}" ${r.size === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+          <div style="display:flex;gap:6px"><button class="btn solid">Save</button><button class="btn danger" type="button" data-r="remove">Remove</button></div>
+          <p class="hint pts-time" style="grid-column:1/-1;margin:0">About ${ptsTime(r.price)} of focused work.</p>
+        </form>`;
+      row.querySelector('input').focus();
+    }
+    if (btn.dataset.r === 'remove') {
+      state.rewards = state.rewards.filter(x => x.id !== id);
+      save(); render(); renderRewards();
+    }
+  });
+  // live "about X of work" while typing a reward's points (add form and edit rows)
+  $('#rewards-dlg').addEventListener('input', (e) => {
+    if (e.target.id === 'r-price') { const v = Number(e.target.value); $('#r-price-time').textContent = v > 0 ? `${fmtPts(v)} points is about ${ptsTime(v)} of focused work.` : ''; }
+    if (e.target.name === 'price') { const v = Number(e.target.value), out = e.target.form.querySelector('.pts-time'); if (out) out.textContent = v > 0 ? `About ${ptsTime(v)} of focused work.` : ''; }
+  });
+  $('#rewards-dlg').addEventListener('submit', (e) => {
+    const form = e.target;
+    e.preventDefault();
+    if (form.id === 'r-add') {
+      const price = Math.round(Number($('#r-price').value));
+      const name = $('#r-name').value.trim();
+      if (!name || !(price > 0)) return;
+      state.rewards.push({ id: uid(), name, price, size: $('#r-size').value });
+      form.reset(); $('#r-size').value = 'medium'; $('#r-price-time').textContent = '';
+    } else if (form.dataset.edit) {
+      const r = state.rewards.find(x => x.id === form.dataset.edit); if (!r) return;
+      const price = Math.round(Number(form.price.value));
+      r.name = form.name.value.trim() || r.name;
+      if (price > 0) r.price = price;
+      r.size = form.size.value;
+    }
+    save(); render(); renderRewards();
+  });
+
+  // settings
+  $('#open-settings').addEventListener('click', () => {
+    const s = state.settings;
+    $('#s-rate').value = s.pointsPerMinute; $('#s-hold').value = s.holdMinutes; $('#s-cut').value = s.phoneCutPct; $('#s-burst').value = s.burstMinutes;
+    $('#s-chime').checked = !!s.chime; $('#s-notify').checked = !!s.notify; $('#s-theme').value = s.theme || 'auto';
+    $('#s-min').value = minSession(); syncHiddenRow(); $('#s-autoend').value = s.autoEndShift || 'off'; $('#s-check').value = s.check || 'phone'; $('#s-ask').value = s.checkAsk || ''; $('#s-name').value = s.checkName || '';
+    syncCheckFields(); renderTypesEdit(); $('#s-type-new').value = '';
+    $('#settings-dlg').returnValue = '';
+    $('#settings-dlg').showModal();
+  });
+  function syncHiddenRow() {
+    const n = hiddenSessions().length;
+    $('#s-hidden-row').hidden = !n;
+    $('#s-hidden-text').textContent = n ? `${n} hidden ${n === 1 ? 'session' : 'sessions'} saved right now.` : '';
+  }
+  $('#s-clear-hidden').addEventListener('click', () => {
+    const gone = hiddenSessions();
+    if (!gone.length) return;
+    state.sessions = state.sessions.filter(counts);
+    save(); render(); syncHiddenRow();
+    toast(`Deleted ${gone.length} hidden ${gone.length === 1 ? 'session' : 'sessions'}.`, () => {
+      state.sessions.push(...gone); state.sessions.sort((a, b) => a.endedAt - b.endedAt); save(); render(); syncHiddenRow();
+    });
+  });
+  function syncCheckFields() {
+    const v = $('#s-check').value;
+    $('#s-custom').hidden = v !== 'custom';
+    $('#s-cut-field').hidden = v === 'off';
+  }
+  $('#s-check').addEventListener('change', () => { syncCheckFields(); if ($('#s-check').value === 'custom') $('#s-ask').focus(); });
+  // Settings save as you change them (no Save button). Typed fields save when you leave them or press Enter.
+  function applySettings() {
+    const s = state.settings;
+    const rate = Number($('#s-rate').value); if (rate > 0) s.pointsPerMinute = Math.round(rate * 2) / 2;
+    const hold = Number($('#s-hold').value); if (hold > 0 && hold <= 240) s.holdMinutes = Math.round(hold * 2) / 2;
+    const cut = Number($('#s-cut').value); if (cut >= 0 && cut <= 100) s.phoneCutPct = cut;
+    const burst = Math.round(Number($('#s-burst').value)); if (burst >= 1 && burst <= 240) s.burstMinutes = burst;
+    s.chime = $('#s-chime').checked;
+    s.notify = $('#s-notify').checked;
+    s.theme = $('#s-theme').value;
+    const mn = Math.round(Number($('#s-min').value)); if ($('#s-min').value !== '' && mn >= 0 && mn <= 30) s.minSessionMin = mn;
+    s.autoEndShift = $('#s-autoend').value;
+    s.checkAsk = $('#s-ask').value.trim();
+    s.checkName = $('#s-name').value.trim();
+    const check = $('#s-check').value;
+    if (!(check === 'custom' && !s.checkAsk && !s.checkName)) s.check = check; // "My own question" waits until there's a question
+    if (s.notify && 'Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+    applyTheme(); save(); render();
+    syncHiddenRow();
+    autoEndShift();
+  }
+  $('#settings-form').addEventListener('change', (e) => {
+    if (e.target.dataset.type) return renameType(e.target);
+    if (!e.target.closest('.data-io') && !e.target.closest('#s-types-field')) applySettings();
+  });
+  // ---- slip types editor ----
+  function renderTypesEdit() {
+    const list = slipTypes();
+    $('#s-types').innerHTML = list.map((x, i) => `<div class="type-row">
+      <input type="text" data-type="${esc(x.id)}" maxlength="24" value="${esc(x.name)}" aria-label="Slip type name">
+      ${i === 0 ? '<span class="first">Default</span>' : `<button type="button" class="btn quiet" data-type-up="${esc(x.id)}" aria-label="Move ${esc(x.name)} up" title="Move up">&uarr;</button>`}
+      ${list.length > 1 ? `<button type="button" class="btn quiet" data-type-del="${esc(x.id)}" aria-label="Remove ${esc(x.name)}" title="Remove">&times;</button>` : ''}
+    </div>`).join('');
+  }
+  const typeTaken = (name, except) => slipTypes().some(x => x.id !== except && x.name.toLowerCase() === name.toLowerCase());
+  function renameType(input) {
+    const x = slipTypes().find(y => y.id === input.dataset.type); if (!x) return;
+    const name = input.value.trim().slice(0, 24);
+    if (name && !typeTaken(name, x.id)) x.name = name;
+    input.value = x.name;
+    save(); render();
+  }
+  function addType() {
+    const name = $('#s-type-new').value.trim().slice(0, 24);
+    if (!name) return $('#s-type-new').focus();
+    if (typeTaken(name)) { toast(`There's already a ${name} type.`, null, 4000); return; }
+    slipTypes().push({ id: 'type-' + uid(), name });
+    $('#s-type-new').value = '';
+    save(); render(); renderTypesEdit(); $('#s-type-new').focus();
+  }
+  $('#s-type-add').addEventListener('click', addType);
+  $('#s-types-field').addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+    e.preventDefault(); // Enter adds or renames here instead of closing Settings
+    if (e.target.id === 's-type-new') addType(); else e.target.blur();
+  });
+  $('#s-types').addEventListener('click', (e) => {
+    const up = e.target.closest('[data-type-up]'), del = e.target.closest('[data-type-del]');
+    const list = slipTypes();
+    if (up) {
+      const i = list.findIndex(x => x.id === up.dataset.typeUp); if (i < 1) return;
+      [list[i - 1], list[i]] = [list[i], list[i - 1]];
+      save(); render(); renderTypesEdit();
+      $(`#s-types [data-type="${CSS.escape(list[i - 1].id)}"]`)?.focus();
+    }
+    if (del && list.length > 1) {
+      const before = list.map(x => ({ ...x }));
+      const i = list.findIndex(x => x.id === del.dataset.typeDel); if (i < 0) return;
+      const [gone] = list.splice(i, 1);
+      const moved = state.tickets.filter(t => t.type === gone.id);
+      moved.forEach(t => { t.type = list[0].id; });
+      save(); render(); renderTypesEdit();
+      const note = moved.length ? ` ${moved.length} ${moved.length === 1 ? 'slip' : 'slips'} moved to ${list[0].name}.` : '';
+      toast(`Removed ${gone.name}.${note}`, () => {
+        state.settings.types = before;
+        moved.forEach(t => { t.type = gone.id; });
+        save(); render(); if ($('#settings-dlg').open) renderTypesEdit();
+      }, 8000);
+    }
+  });
+  $('#s-close').addEventListener('click', () => $('#settings-dlg').close('done'));
+  $('#settings-dlg').addEventListener('close', () => {
+    if ($('#settings-dlg').returnValue === 'import') return; // an import replaced the board; the form shows the old settings
+    applySettings(); // catches a field still being typed in when closed with Esc
+  });
+  $('#settings-dlg').addEventListener('click', (e) => { if (e.target === $('#settings-dlg')) $('#settings-dlg').close('done'); }); // click outside closes
+
+  $('#spike-fab').addEventListener('click', openSpike);
+  $('#stats').addEventListener('click', (e) => { const t = e.target.closest('#stat-today'); if (t) toast(t.title, null, 5000); });
+  $('#spike-view').addEventListener('click', (e) => {
+    if (e.target.closest('[data-s=close]')) return closeSpike();
+    if (e.target.closest('[data-s=sample-back]')) return openSpike();
+    if (e.target.closest('[data-s=past]')) return showPastShifts();
+    const ps = e.target.closest('[data-shift]'); if (ps) return showPastShift(ps.dataset.shift);
+    if (e.target.closest('[data-s=end-shift]')) return endShift();
+    const card = e.target.closest('.spiked-slip');
+    if (card) { closeSpike(true); openPick(card.dataset.id); } // one layer at a time
+  });
+  document.querySelectorAll('dialog').forEach(d => d.addEventListener('close', () => {
+    if ($('#toast').parentElement === d) document.body.appendChild($('#toast'));
+  }));
+  $('#toast-undo').addEventListener('click', () => { if (toastUndo) toastUndo(); $('#toast').hidden = true; toastUndo = null; });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'n' && !e.metaKey && !e.ctrlKey && !e.altKey && $('#focus').hidden
+        && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && !document.querySelector('dialog[open]')) {
+      e.preventDefault(); $('#add-name').focus();
+    }
+    if (e.key === 'Escape' && spikeOpen) return closeSpike();
+    if (e.key === 'Escape' && pickId && !pickEdit && !$('#pick').classList.contains('in-session') && !document.querySelector('dialog[open]')) {
+      const back = ticketById(pickId)?.doneAt; closePick(!back); if (back) openSpike();
+    }
+  });
+
+  setInterval(holdTick, 1000);
+  setInterval(autoEndShift, 60000);
+  // keep ticket ages fresh, and catch a burst that ended while the tab slept
+  setInterval(() => { if ($('#focus').hidden) renderRail(); }, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && state.active) renderFocus(); });
+  window.addEventListener('resize', () => { if (!$('#focus').hidden) $('#focus').classList.toggle('docked', !!pickId && wide()); });
+}
+
+(async function init() {
+  wire();
+  await load();
+  applyTheme();
+  $('#add-area').value = filter === 'personal' ? 'personal' : 'work';
+  render();
+  autoEndShift();
+  if (state.active) resumeSession(); // resume a session that was running before a reload
+  else if (state.tour === 'pending') setTimeout(beginOnboarding, 500);
+})();
+})();
+</script>
+</body>
+</html>
