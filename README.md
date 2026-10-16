@@ -76,7 +76,7 @@ Downloading a web page file from someone can reasonably make you pause, so here'
 Because this is a plain file, anyone could edit a copy and pass it along. Get it from Erro directly, or from the one place it's shared. To double-check a copy, compare its fingerprint (SHA-256) with the one below. If they match, the file is exactly the one Erro released.
 
 <!-- checksum:start -->
-`01ef51d3ada4947bfc1fa2c04392e3aca88ea2c909d8dc9c62d745180060d2dd`
+`e6e3c57e4a97b6c31e11c87e215fe2140df60f76d1186d391c999873fe1b151b`
 <!-- checksum:end -->
 
 - **Mac:** open Terminal, type `shasum -a 256 ` (with a space at the end), drag the file into the window, and press Return.

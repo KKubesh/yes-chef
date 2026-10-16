@@ -91,6 +91,8 @@ button { cursor: pointer; }
 .meter { height: 8px; border-radius: 4px; background: var(--steel-deep); overflow: hidden; margin-top: 6px; }
 .meter i { display: block; height: 100%; background: var(--order); border-radius: 4px; transition: width .4s ease; }
 .bar-actions { display: flex; gap: 8px; }
+.settings-btn { display: inline-flex; align-items: center; gap: 7px; }
+.settings-btn .gear { display: none; }
 
 .btn {
   border: 1.5px solid var(--ink);
@@ -133,6 +135,11 @@ button { cursor: pointer; }
   padding: 4px 24px 18px;
 }
 .add { display: flex; gap: 8px; flex: 1 1 520px; max-width: 760px; }
+/* the add box stays a single line until you use it; type, area and Add show while you're adding */
+.add:not(.open) select, .add:not(.open) button { display: none; }
+.add.open select, .add.open button { animation: add-in .18s ease both; }
+@keyframes add-in { from { opacity: 0; translate: 0 -4px; } }
+@media (prefers-reduced-motion: reduce) { .add.open select, .add.open button { animation: none; } }
 .add input[type=text] {
   flex: 1;
   min-width: 0;
@@ -301,6 +308,11 @@ button { cursor: pointer; }
   font-size: 14px;
 }
 .today strong { color: var(--ink); }
+.today { align-items: baseline; row-gap: 6px; }
+.today:empty { display: none; }
+@media (max-width: 360px) { .stats { gap: 14px !important; } .stat span { font-size: 12px; } .stat b { font-size: 23px; } }
+.stat-today { background: none; border: 0; padding: 0; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+.stat-today:hover span, .stat-today:focus-visible span { text-decoration: underline dotted; text-underline-offset: 3px; }
 
 /* ---------- focus (service) screen ---------- */
 .focus {
@@ -425,7 +437,7 @@ button { cursor: pointer; }
 .pick.open .pick-panel { opacity: 1; translate: 0 0; }
 .pick-panel h2 { font: 700 clamp(36px, 4.4vw, 56px)/1 var(--display); margin: 0 0 20px; }
 .pick-panel .sub { color: var(--service-soft); font-size: 17px; margin: 0 0 24px; }
-.pick-panel .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.pick-panel .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .pick-panel .more { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 22px; }
 .pick .btn { border-color: var(--service-ink); color: var(--service-ink); padding: 12px 20px; font-size: 17px; }
 .pick .btn.go { background: var(--order); border-color: var(--order); color: var(--order-ink); padding: 14px 26px; font-size: 19px; }
@@ -435,7 +447,11 @@ button { cursor: pointer; }
 @media (max-width: 760px) {
   .pick { grid-template-columns: 1fr; grid-template-rows: auto auto; align-content: center; row-gap: 22px; overflow-y: auto; }
   .pick { padding-top: 32px; padding-bottom: 32px; }
-  .slip-hold { justify-self: center; height: 40vh; width: min(30vh + 40px, 100%); }
+  /* phones: the slip shows at its full height (no cropping) and the whole view scrolls, panel below */
+  .pick { align-content: start; }
+  .slip-hold { justify-self: center; height: auto; width: min(100%, 420px); }
+  .big-slip { position: relative; inset: auto; min-height: 0; padding: 28px 22px 34px; }
+  .big-slip h2 { font-size: 24px; }
   .pick-panel { justify-self: stretch; }
 }
 @media (pointer: coarse) {
@@ -494,6 +510,26 @@ button { cursor: pointer; }
 .pick-panel .lengths button, .pick-panel .lengths input { font-family: var(--print); font-weight: 700; font-size: 19px; }
 
 /* ---------- the spike (finished tickets) ---------- */
+.spike-fab {
+  display: grid; place-items: center;
+  position: fixed; right: 24px; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: 30;
+  width: 58px; height: 58px; border-radius: 50%;
+  background: var(--steel); color: var(--ink);
+  border: 1.5px solid var(--ink-soft);
+  box-shadow: 0 6px 16px rgba(0,0,0,.22);
+  cursor: pointer; padding: 0;
+}
+.spike-fab:active { scale: .96; }
+.spike-fab:hover { border-color: var(--ink); }
+body { padding-bottom: 100px; } /* room so the spike button never covers anything */
+.spike-fab .badge {
+  position: absolute; top: -4px; right: -4px;
+  min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px;
+  background: var(--order); color: var(--order-ink);
+  font: 700 12px/22px var(--body); text-align: center;
+  box-shadow: 0 0 0 2px var(--steel);
+}
+.spike-fab .badge[hidden] { display: none; }
 .spike {
   position: fixed; right: 28px; bottom: 26px; z-index: 30;
   width: 128px; height: 168px;
@@ -543,7 +579,22 @@ button { cursor: pointer; }
 .spike-view[hidden] { display: none; }
 .spike-view.open .pick-backdrop { opacity: 1; }
 .spike-panel { position: relative; width: min(440px, 100%); max-height: 88vh; display: flex; flex-direction: column; }
-.spike-head { display: flex; justify-content: space-between; align-items: baseline; color: var(--service-ink); margin-bottom: 14px; }
+/* the spike picture on the left, the title stacked beside it, the buttons in a row underneath */
+.spike-head { display: flex; align-items: center; gap: 16px; color: var(--service-ink); margin-bottom: 12px; }
+.spike-head h2 { max-width: 6.6ch; } /* "On the / spike" stacks; other titles wrap the same way */
+.spike-head-actions { margin: 0; }
+/* Past shifts and End shift sit at the bottom, like the other windows' buttons */
+.spike-foot { flex: none; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.12); }
+.spike-foot #spike-end { width: 100%; }
+.spike-foot .btn.end-shift { margin-left: auto; }
+.spike-head-actions:has(#spike-end:empty) { display: none; }
+.spike-x { position: absolute; top: 0; right: 0; z-index: 2; color: var(--service-soft); border-color: transparent; font-size: 20px; line-height: 1; padding: 8px 10px; }
+.spike-x:hover { color: var(--service-ink); background: rgba(255,255,255,.07); }
+.spike-head-actions .btn { color: var(--service-soft); border-color: transparent; }
+/* the spike illustration, now a little picture in the spike view: the same stack of slips */
+.spike-art-wrap { position: relative; flex: none; width: 90px; height: 118px; margin: -10px 0 -4px -8px; }
+.spike.spike-art { position: absolute; left: 0; top: 0; right: auto; bottom: auto; z-index: auto; scale: .7; transform-origin: 0 0; cursor: default; pointer-events: none; }
+.spike.spike-art .spike-count { display: none; }
 .spike-head h2 { font: 700 34px/1 var(--print); margin: 0; }
 .spike-head .btn { color: var(--service-soft); border-color: transparent; }
 .spike-head-actions { display: flex; gap: 8px; align-items: center; }
@@ -559,11 +610,11 @@ button { cursor: pointer; }
 .past-shift .when i { font-style: normal; border: 1px solid #b7b0a2; border-radius: 3px; padding: 0 5px; margin-left: 6px; font-size: 11px; }
 .past-shift .nums { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; }
 .past-shift .nums b { font-size: 18px; }
-.spike-head .btn.end-shift { border-color: var(--service-soft); color: var(--service-ink); padding: 7px 14px; }
-.spike-head .btn.end-shift:hover { background: rgba(255,255,255,.07); }
+.spike-head-actions .btn.end-shift { border-color: var(--service-soft); color: var(--service-ink); padding: 7px 14px; }
+.spike-head-actions .btn.end-shift:hover { background: rgba(255,255,255,.07); }
 .shift-sofar { margin: -6px 0 10px; color: var(--service-soft); font-size: 14px; }
 .shift-sofar:empty { display: none; }
-.spike-stack { overflow-y: auto; padding: 18px 18px 40px; margin: 0 -18px; }
+.spike-stack { overflow-y: auto; min-height: 0; padding: 18px 18px 24px; margin: 0 -18px; }
 .spiked-slip {
   display: grid; gap: 6px;
   width: 100%;
@@ -626,7 +677,10 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .shift-receipt { animation: none; } }
 .spiked-tag { border: 1.5px solid currentColor; padding: 0 7px; border-radius: 3px; font-weight: 700; }
 @media (max-width: 760px) {
-  .spike { right: 12px; bottom: 12px; scale: .78; transform-origin: 100% 100%; }
+  .spike-fab { right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+  .spike-art-wrap { width: 78px; height: 102px; }
+  .spike.spike-art { scale: .6; }
+  .spike-head h2 { font-size: 30px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .spiked-slip { transition: none; translate: 0 0; scale: 1; opacity: 1; }
@@ -700,7 +754,13 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
 .field { display: grid; gap: 5px; margin-bottom: 14px; }
 .field[hidden], .field-pair[hidden], .weeks[hidden] { display: none; }
 .support { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 10px; }
-.support a { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.support { line-height: 2; }
+.support a {
+  display: inline-block; line-height: 1.4; margin: 0 2px;
+  background: var(--order); color: #1d1a16; font-weight: 700; text-decoration: none;
+  padding: 3px 10px; border-radius: 999px;
+}
+.support a:hover, .support a:focus-visible { background: color-mix(in srgb, var(--order) 85%, white); outline: none; box-shadow: 0 0 0 2px var(--ink-soft); }
 .data-io { border-top: 1px solid var(--line); margin: 14px 0 6px; padding-top: 12px; }
 .data-io .label { font-weight: 600; display: block; margin-bottom: 8px; }
 .data-io-btns { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -721,6 +781,7 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
 .dlg-foot { display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap; margin-top: 18px; }
 .dlg-foot .right { display: flex; gap: 8px; }
 .close-x { float: right; }
+.settings-x { font-size: 18px; line-height: 1; padding: 6px 10px; margin: -4px -8px 0 0; }
 
 .balance { font: 700 56px/1 var(--display); margin: 0; }
 .reward { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 12px 0; border-top: 1px solid var(--line); align-items: center; }
@@ -833,11 +894,17 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
   font-size: 15px;
 }
 .toast[hidden] { display: none; }
+.spike-view:not([hidden]) ~ .toast { bottom: 92px; } /* clear of the spike view's bottom buttons */
 .toast button { background: transparent; border: 0; color: var(--ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; padding: 2px 4px; }
 
 @media (max-width: 760px) {
-  .wordmark .logo { height: 44px; }
-  .bar { grid-template-columns: 1fr auto; padding: 14px 16px; }
+  .wordmark .logo { height: 40px; width: auto; max-width: 100%; }
+  .bar { grid-template-columns: minmax(0, 1fr) auto; gap: 12px 12px; padding: 12px 16px; }
+  /* icon-only Rewards and Settings so the header fits narrow phones */
+  .bar-actions .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .rewards-btn, .settings-btn { padding: 8px 10px; }
+  .settings-btn { border: 1.5px solid var(--ink-soft); }
+  .settings-btn .gear { display: block; }
   .stats { grid-column: 1 / -1; grid-row: 2; gap: 20px; }
   .controls { padding: 4px 16px 16px; }
   .add { flex-wrap: wrap; }
@@ -846,7 +913,9 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
   .ticket { flex-basis: min(76vw, 260px); }
   .answer { grid-template-columns: 1fr 1fr; }
   .inline-form { grid-template-columns: 1fr 1fr; }
-  .today { padding: 6px 16px 28px; }
+  .today { padding: 6px 16px 12px; }
+  body { padding-bottom: 96px; } /* room so the spike button never covers anything */
+  body { overflow-x: hidden; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
@@ -862,10 +931,13 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
   <div class="bar-actions">
     <button class="btn rewards-btn" id="open-rewards">
       <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg>
-      <span>Rewards</span>
+      <span class="label">Rewards</span>
       <span class="badge" id="rewards-badge" hidden></span>
     </button>
-    <button class="btn quiet" id="open-settings">Settings</button>
+    <button class="btn quiet settings-btn" id="open-settings" aria-label="Settings">
+      <svg class="gear" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      <span class="label">Settings</span>
+    </button>
   </div>
 </header>
 
@@ -881,8 +953,8 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
 
 <section class="controls" aria-label="Add and filter">
   <form class="add" id="add-form" autocomplete="off">
-    <label class="sr-only" for="add-name">New ticket</label>
-    <input type="text" id="add-name" placeholder="Add something you're working on or waiting on" maxlength="120">
+    <label class="sr-only" for="add-name">Add a slip</label>
+    <input type="text" id="add-name" placeholder="Add a slip: something you're working on or waiting on" maxlength="120">
     <label class="sr-only" for="add-type">Type</label>
     <select id="add-type">
       <option value="task">Task</option>
@@ -928,7 +1000,7 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
 <!-- rewards -->
 <dialog id="rewards-dlg">
   <div class="dlg">
-    <button class="btn quiet close-x" data-close>Close</button>
+    <button class="btn quiet close-x settings-x" data-close aria-label="Close rewards">&#10005;</button>
     <h2>Rewards</h2>
     <p class="balance" id="r-balance"></p>
     <p class="hint">Your running total. Claiming a reward never takes points away. Each reward comes around again every time you pass its mark. <span id="r-rate"></span></p>
@@ -952,7 +1024,9 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
 <!-- settings -->
 <dialog id="settings-dlg">
   <form class="dlg" id="settings-form" method="dialog">
+    <button type="button" class="btn quiet close-x settings-x" id="s-close" aria-label="Close settings">&#10005;</button>
     <h2>Settings</h2>
+    <p class="hint" style="margin:-6px 0 14px">Changes save as you make them.</p>
     <label class="field"><span>Points per minute worked</span><input id="s-rate" type="number" min="0.5" step="0.5">
       <p class="hint">At 5 per minute, a 15-minute burst earns 75 and a 45-minute one earns 225.</p></label>
     <label class="field"><span>After each session, ask</span>
@@ -989,7 +1063,7 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
     <label class="field"><span>Theme</span>
       <select id="s-theme"><option value="auto">Match system</option><option value="light">Light</option><option value="dark">Dark</option></select>
     </label>
-    <button type="button" class="btn quiet" id="s-tour" style="padding-left:0">Show the walkthrough again</button>
+    <button type="button" class="btn quiet" id="s-tour">Show the walkthrough again</button>
     <div class="data-io">
       <span class="label">Your data</span>
       <div class="data-io-btns">
@@ -1001,29 +1075,33 @@ dialog::backdrop { background: rgba(15,18,20,.45); }
       <div class="import-confirm" id="s-import-confirm" hidden></div>
     </div>
     <p class="hint" id="s-file"></p>
-    <button type="button" class="btn quiet" id="s-switch" style="padding-left:0">Use a different data file</button>
-    <p class="hint support">Yes, Chef is free and runs entirely on your device. If it helps you focus, you can <a href="https://buymeacoffee.com/kkubesh" target="_blank" rel="noopener noreferrer">buy me a coffee &#9749;</a>.</p>
+    <button type="button" class="btn quiet" id="s-switch" style="margin-top:10px">Use a different data file</button>
+    <p class="hint support">Yes, Chef is free and runs entirely on your device. If it helps you focus, you can <a href="https://buymeacoffee.com/kkubesh" target="_blank" rel="noopener noreferrer">buy me a coffee &#9749;</a></p>
     <div class="dlg-foot">
       <span></span>
       <div class="right">
-        <button class="btn quiet" value="cancel" formnovalidate>Cancel</button>
-        <button class="btn solid" value="save">Save</button>
+        <button class="btn solid" value="done">Done</button>
       </div>
     </div>
   </form>
 </dialog>
 
-<button class="spike" id="spike" aria-label="The spike: finished tickets"></button>
+<button class="spike-fab" id="spike-fab" aria-label="The spike: finished tickets">
+  <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 14.6V25.5" stroke-width="2.2"/><path d="M9 11.2 22.8 9.6 24 19.3l-1.85 1.05-1.85-.95-1.85 1.05-1.85-.95-1.85 1.05-1.85-.95-1.85 1.05-1.85-.95z" fill="var(--steel)" stroke-width="1.6"/><path d="M11.6 14.4l2.8-.32M18.2 13.65l3-.34M12.3 17.2l6.8-.75" stroke-width="1.1" opacity=".55"/><path d="M16 3.5V14.6" stroke-width="2.2"/><ellipse cx="16" cy="27" rx="8.5" ry="2.4" fill="currentColor" stroke="none" opacity=".85"/></svg>
+  <span class="badge" id="spike-fab-count" hidden></span>
+</button>
 
 <section class="spike-view" id="spike-view" hidden role="dialog" aria-modal="true" aria-labelledby="spike-title">
   <div class="pick-backdrop" data-s="close"></div>
   <div class="spike-panel">
+    <button class="btn quiet spike-x" data-s="close" aria-label="Close">&#10005;</button>
     <div class="spike-head">
+      <div class="spike-art-wrap" aria-hidden="true"><div class="spike spike-art empty" id="spike"></div></div>
       <h2 id="spike-title">On the spike</h2>
-      <div class="spike-head-actions"><span id="spike-end"></span><button class="btn quiet" data-s="close">Close</button></div>
     </div>
     <p class="shift-sofar" id="shift-sofar"></p>
     <div class="spike-stack" id="spike-stack"></div>
+    <div class="spike-head-actions spike-foot"><span id="spike-end"></span></div>
   </div>
 </section>
 
@@ -1516,7 +1594,7 @@ const TOUR = [
     text: 'Every slip is something in flight. The front of the line is on the left. Open a slip to start working on it.' },
   { target: () => practiceEl(t => t.type === 'person'), title: 'Waiting on something?',
     text: 'Put it on hold. It dims and counts down, then comes back to the front with a chime. Keep an eye on this one.' },
-  { target: () => $('#spike'), title: 'The spike', sample: true,
+  { target: () => spikeBtn(), title: 'The spike', sample: true,
     text: 'When a ticket is done, spike it. Click the spike to look back at your work. When you wrap up, press End shift: it clears the board and gives you a shift report. Settings can do it for you each new day.' },
   { target: () => $('#open-rewards'), title: 'Points and rewards',
     text: () => {
@@ -1633,7 +1711,11 @@ function placeTour() {
 
   const el = step.target();
   // a new rail step: slide the rail so its slip is in view, and wait for the slide to finish before appearing
-  if (el && card.dataset.shown !== key) { card.dataset.shown = key; if (el.closest('#tickets')) { el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); railScrolledAt = Date.now(); } }
+  if (el && card.dataset.shown !== key) {
+    card.dataset.shown = key;
+    if (el.closest('#tickets')) { el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); railScrolledAt = Date.now(); }
+    else if (!side) { const r = el.getBoundingClientRect(); if (r.bottom > innerHeight || r.top < 0) { el.scrollIntoView({ block: 'center' }); } } // e.g. the spike below the board on a phone
+  }
   const scrolling = Date.now() - railScrolledAt < 350;
   if (!showing && scrolling && el && el.closest('#tickets')) return;
 
@@ -1703,9 +1785,18 @@ let filter = lsGet('focus-filter') || 'all';
 
 function renderStats() {
   const b = balance();
+  // today's work sits with the other numbers; tap or hover it for the breakdown
+  const today = liveSessions().filter(s => s.endedAt >= startOfDay());
+  const free = today.filter(s => wasChecked(s) && !s.phone).length;
+  const pts = today.reduce((a, s) => a + s.points, 0);
+  const mins = today.reduce((a, s) => a + sessionMinutes(s), 0);
+  const detail = today.length
+    ? `Today: ${today.length} ${today.length === 1 ? 'session' : 'sessions'}${avoid().on ? `, ${free} ${low(avoid().clean)}` : ''}, ${fmtPts(pts)} points.`
+    : 'Nothing yet today. Open a slip, get going.';
   $('#stats').innerHTML = `
     <div class="stat"><b>${fmtPts(b)}</b><span>points earned</span></div>
-    ${avoid().on ? `<div class="stat"><b>${streak()}</b><span>${esc(low(avoid().clean))} streak</span></div>` : ''}`;
+    ${avoid().on ? `<div class="stat"><b>${streak()}</b><span>${esc(low(avoid().clean))} streak</span></div>` : ''}
+    <button type="button" class="stat stat-today" id="stat-today" title="${esc(detail)}" aria-label="${esc(`${fmtMin(mins)} worked today. ${detail}`)}"><b>${today.length ? fmtMin(mins) : '0 min'}</b><span>worked today</span></button>`;
 
   // Rewards button: a quiet badge with how many things are ready to claim.
   const claimable = state.rewards.reduce((a, r) => a + rewardStatus(r, b).ready, 0);
@@ -1714,12 +1805,7 @@ function renderStats() {
   badge.hidden = !claimable;
   $('#open-rewards').setAttribute('aria-label', claimable ? `Rewards, ${claimable} ready to claim` : 'Rewards');
 
-  const today = liveSessions().filter(s => s.endedAt >= startOfDay());
-  const free = today.filter(s => wasChecked(s) && !s.phone).length;
-  const pts = today.reduce((a, s) => a + s.points, 0);
-  $('#today').innerHTML = today.length
-    ? `<span>Today: <strong>${today.length}</strong> ${today.length === 1 ? 'session' : 'sessions'}</span>${avoid().on ? `<span><strong>${free}</strong> ${esc(low(avoid().clean))}</span>` : ''}<span><strong>${fmtPts(pts)}</strong> points earned</span>`
-    : `<span>No sessions yet today. Pick a ticket to start one.</span>`;
+  $('#today').innerHTML = ''; // only the practice reminder lives under the rail now
   if (hasPractice() && !tourOn()) $('#today').insertAdjacentHTML('beforeend', '<span class="practice">Practice tickets are still on the board. <button type="button" data-tour="clear">Clear them</button></span>');
 }
 
@@ -1772,7 +1858,15 @@ function render() { renderStats(); renderRail(); renderSpike(); placeTour(); }
 let spikeOpen = false;
 const spiked = () => state.tickets.filter(t => t.doneAt && !t.archivedAt).sort((a, b) => b.doneAt - a.doneAt); // newest on top
 
+// the spike's button on screen: the full spike, or the round button on phones
+const spikeBtn = () => $('#spike-fab');
 function renderSpike() {
+  const fab = $('#spike-fab'), n = spiked().length;
+  if (fab) {
+    $('#spike-fab-count').textContent = n > 99 ? '99+' : n;
+    $('#spike-fab-count').hidden = !n;
+    fab.setAttribute('aria-label', n ? `The spike: ${n} finished ${n === 1 ? 'ticket' : 'tickets'}. Open to review.` : 'The spike: finished tickets land here');
+  }
   const list = spiked();
   const shown = list.slice(0, 7).reverse(); // drawn bottom-up, newest last so it sits on top
   const btn = $('#spike');
@@ -1980,7 +2074,7 @@ function openSpike() {
   view.hidden = false;
   spikeOpen = true;
   requestAnimationFrame(() => requestAnimationFrame(() => view.classList.add('open')));
-  setTimeout(() => (view.querySelector('.spiked-slip') || view.querySelector('[data-s=close]'))?.focus({ preventScroll: true }), 80);
+  setTimeout(() => (view.querySelector('.spiked-slip') || view.querySelector('.spike-x'))?.focus({ preventScroll: true }), 80);
 }
 function closeSpike(toReview) {
   const view = $('#spike-view');
@@ -1988,7 +2082,7 @@ function closeSpike(toReview) {
   view.classList.remove('open');
   if (toReview) { view.hidden = true; return; }
   setTimeout(() => { if (!spikeOpen) view.hidden = true; }, reducedMotion() ? 0 : 220);
-  $('#spike').focus({ preventScroll: true });
+  spikeBtn().focus({ preventScroll: true });
 }
 
 // ---------- focus flow ----------
@@ -2283,9 +2377,8 @@ function renderPick() {
       <input id="custom-len" type="number" min="2" max="240" placeholder="min" value="${F.mode === 'burst' && !lens.includes(F.minutes) ? F.minutes : ''}">
       <button data-len="open" aria-pressed="${F.mode === 'open'}">Open, no timer</button>
     </div>
-    <p class="sub">${F.mode === 'open' ? 'The clock counts up. End it whenever you stop.' : `A ${F.minutes}-minute burst, with a soft chime halfway.`}</p>
-    <div class="actions"><button class="btn go" data-p="start">Start work</button></div>
-    <div class="more"><button class="btn quiet" data-p="close">Back to the rail</button></div>`;
+    <p class="sub">${F.mode === 'open' ? 'Counts up until you stop.' : `${F.minutes} minutes, with a soft chime halfway.`}</p>
+    <div class="actions"><button class="btn go" data-p="start">Start work</button><button class="btn quiet" data-p="close">Back to the rail</button></div>`;
   $('#pick-panel').inert = pickEdit;
   slip.querySelectorAll('textarea').forEach(fitField);
 }
@@ -2614,6 +2707,16 @@ function renderRewards() {
 function wire() {
   bannerEl = $('#banner');
 
+  // open the add box while it has focus or text; fold it back when it's empty and you've moved on
+  const addForm = $('#add-form'), addName = $('#add-name');
+  const syncAdd = () => addForm.classList.toggle('open', addForm.contains(document.activeElement) || addName.value.trim() !== '');
+  addForm.addEventListener('focusin', syncAdd);
+  addForm.addEventListener('focusout', () => setTimeout(syncAdd, 0));
+  addName.addEventListener('input', syncAdd);
+  addName.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !addName.value) addName.blur(); });
+  const shortAdd = matchMedia('(max-width: 760px)');
+  const placeAdd = () => { addName.placeholder = shortAdd.matches ? 'Add a slip…' : 'Add a slip: something you\'re working on or waiting on'; };
+  placeAdd(); shortAdd.addEventListener?.('change', placeAdd);
   $('#add-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const name = $('#add-name').value.trim();
@@ -2868,6 +2971,7 @@ function wire() {
     $('#s-chime').checked = !!s.chime; $('#s-notify').checked = !!s.notify; $('#s-theme').value = s.theme || 'auto';
     $('#s-min').value = minSession(); syncHiddenRow(); $('#s-autoend').value = s.autoEndShift || 'off'; $('#s-check').value = s.check || 'phone'; $('#s-ask').value = s.checkAsk || ''; $('#s-name').value = s.checkName || '';
     syncCheckFields();
+    $('#settings-dlg').returnValue = '';
     $('#settings-dlg').showModal();
   });
   function syncHiddenRow() {
@@ -2890,8 +2994,8 @@ function wire() {
     $('#s-cut-field').hidden = v === 'off';
   }
   $('#s-check').addEventListener('change', () => { syncCheckFields(); if ($('#s-check').value === 'custom') $('#s-ask').focus(); });
-  $('#settings-dlg').addEventListener('close', () => {
-    if ($('#settings-dlg').returnValue !== 'save') return;
+  // Settings save as you change them (no Save button). Typed fields save when you leave them or press Enter.
+  function applySettings() {
     const s = state.settings;
     const rate = Number($('#s-rate').value); if (rate > 0) s.pointsPerMinute = Math.round(rate * 2) / 2;
     const hold = Number($('#s-hold').value); if (hold > 0 && hold <= 240) s.holdMinutes = Math.round(hold * 2) / 2;
@@ -2902,16 +3006,25 @@ function wire() {
     s.theme = $('#s-theme').value;
     const mn = Math.round(Number($('#s-min').value)); if ($('#s-min').value !== '' && mn >= 0 && mn <= 30) s.minSessionMin = mn;
     s.autoEndShift = $('#s-autoend').value;
-    s.check = $('#s-check').value;
     s.checkAsk = $('#s-ask').value.trim();
     s.checkName = $('#s-name').value.trim();
-    if (s.check === 'custom' && !s.checkAsk && !s.checkName) s.check = 'phone';
+    const check = $('#s-check').value;
+    if (!(check === 'custom' && !s.checkAsk && !s.checkName)) s.check = check; // "My own question" waits until there's a question
     if (s.notify && 'Notification' in window && Notification.permission === 'default') Notification.requestPermission();
     applyTheme(); save(); render();
+    syncHiddenRow();
     autoEndShift();
+  }
+  $('#settings-form').addEventListener('change', (e) => { if (!e.target.closest('.data-io')) applySettings(); });
+  $('#s-close').addEventListener('click', () => $('#settings-dlg').close('done'));
+  $('#settings-dlg').addEventListener('close', () => {
+    if ($('#settings-dlg').returnValue === 'import') return; // an import replaced the board; the form shows the old settings
+    applySettings(); // catches a field still being typed in when closed with Esc
   });
+  $('#settings-dlg').addEventListener('click', (e) => { if (e.target === $('#settings-dlg')) $('#settings-dlg').close('done'); }); // click outside closes
 
-  $('#spike').addEventListener('click', openSpike);
+  $('#spike-fab').addEventListener('click', openSpike);
+  $('#stats').addEventListener('click', (e) => { const t = e.target.closest('#stat-today'); if (t) toast(t.title, null, 5000); });
   $('#spike-view').addEventListener('click', (e) => {
     if (e.target.closest('[data-s=close]')) return closeSpike();
     if (e.target.closest('[data-s=sample-back]')) return openSpike();
