@@ -102,7 +102,7 @@ Downloading a web page file from someone can reasonably make you pause, so here'
 Because this is a plain file, anyone could edit a copy and pass it along. Get it from this repo or the live site, not from a copy someone passed along. To double-check a copy, compare its fingerprint (SHA-256) with the one below. If they match, the file is exactly the one Erro released.
 
 <!-- checksum:start -->
-`e47ce43fab232ba0b5f129626735389148fafd9311fa202aa03d2c509cc5575d`
+`fc2cf939230a2acdf58a502f6b96b87f8ffe990d770b912256e1908e1f1892d0`
 <!-- checksum:end -->
 
 - **Mac:** open Terminal, type `shasum -a 256 ` (with a space at the end), drag the file into the window, and press Return.

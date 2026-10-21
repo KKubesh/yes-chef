@@ -290,6 +290,22 @@ button { cursor: pointer; }
 .ticket .area::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
 .area.work { color: var(--work); }
 .area.personal { color: var(--personal); }
+/* the trailing side edge lifts in the wind while a slip is moving (see flutterRail):
+   a tall, narrow flap folded along a steep line, lifting most at the bottom */
+.ticket .curl {
+  position: absolute; bottom: 6px; left: 0; z-index: 2;
+  width: 30px; height: 96px; pointer-events: none;
+  opacity: 0; transform: scaleX(0); transform-origin: 0 100%;
+  filter: drop-shadow(2px 1px 2px rgba(0, 0, 0, .2));
+}
+.ticket .curl::before {
+  content: ""; position: absolute; inset: 0;
+  /* fold line from the top-left down to the bottom middle; the tip of the lifted edge sits out to the right */
+  clip-path: polygon(0 0, 46% 100%, 100% 90%);
+  background: linear-gradient(to right, #c7bea6, #e6dfcc 55%, #f7f2e4);
+}
+.ticket .curl.right { left: auto; right: 0; transform-origin: 100% 100%; filter: drop-shadow(-2px 1px 2px rgba(0, 0, 0, .2)); }
+.ticket .curl.right::before { clip-path: polygon(100% 0, 54% 100%, 0 90%); background: linear-gradient(to left, #c7bea6, #e6dfcc 55%, #f7f2e4); }
 .ticket .row { display: flex; gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 1.5px dashed color-mix(in srgb, var(--ink-soft) 45%, transparent); }
 .ticket .btn.solid { color: var(--receipt); }
 .ticket .btn:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
@@ -1865,6 +1881,7 @@ function renderRail() {
     .filter(t => !t.doneAt && (filter === 'all' || t.area === filter))
     .sort(byRail);
   const el = $('#tickets');
+  const before = railPositions(el);
   if (!list.length) {
     const hiddenCount = state.tickets.filter(t => !t.doneAt).length;
     el.innerHTML = `<div class="empty"><b>${hiddenCount ? 'Nothing here in this view' : 'The rail is empty'}</b>${
@@ -1881,8 +1898,75 @@ function renderRail() {
         <button class="btn solid" data-act="start">Start</button>
         <button class="btn" data-act="hold">${holdLabel(t)}</button>
       </div>
+      <i class="curl" aria-hidden="true"></i>
     </article>`).join('');
+  flutterRail(el, before);
   requestAnimationFrame(updateRailEdges);
+}
+
+// ---------- slips blowing over ----------
+// When the rail reorders (a slip comes off hold to the front, a new slip, a drag), each slip slides from where it was
+// to where it is now and swings from its clip like paper caught in a draft: the bottom trails, overshoots, settles.
+// Slips that jump a long way to the front, and brand-new ones, flutter down onto their clip instead.
+const calmMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+let railFilterSeen = null;
+// The trailing side edge lifts as the slip moves, then lies flat again.
+function curlCorner(card, side, timing) {
+  const curl = card.querySelector('.curl'); if (!curl) return;
+  curl.classList.toggle('right', side === 'right');
+  curl.animate([
+    { opacity: 0, transform: 'scaleX(0)' },
+    { opacity: 1, transform: 'scaleX(1)', offset: .32 },
+    { opacity: 1, transform: 'scaleX(.5)', offset: .6 },
+    { opacity: 0, transform: 'scaleX(0)' },
+  ], { ...timing, fill: 'none' });
+}
+function railPositions(el) {
+  const box = el.getBoundingClientRect(), map = new Map();
+  el.querySelectorAll('.ticket').forEach(c => { const r = c.getBoundingClientRect(); map.set(c.dataset.id, r.left - box.left + el.scrollLeft); });
+  return map;
+}
+function flutterRail(el, before) {
+  const sameView = railFilterSeen === filter; railFilterSeen = filter;
+  if (calmMotion.matches || !sameView || !before.size || !el.animate) return;
+  const after = railPositions(el);
+  const cards = [...el.querySelectorAll('.ticket')];
+  const width = cards[0]?.offsetWidth || 236;
+  let wave = 0;
+  cards.forEach(c => {
+    const tilt = parseFloat(c.style.getPropertyValue('--tilt')) || 0;
+    const rot = (d) => `rotate(${(tilt + d).toFixed(2)}deg)`;
+    const was = before.get(c.dataset.id), now = after.get(c.dataset.id);
+    const delay = Math.min(wave, 8) * 45;
+    if (was === undefined || was - now > width * 1.5) {
+      // flutters down onto its clip
+      wave++;
+      c.animate([
+        { transform: `translate(0, -26px) ${rot(-9)}`, opacity: 0 },
+        { transform: `translate(0, -6px) ${rot(6)}`, opacity: 1, offset: .4 },
+        { transform: `translate(0, 0) ${rot(-3.5)}`, offset: .65 },
+        { transform: `translate(0, 0) ${rot(1.2)}`, offset: .85 },
+        { transform: `translate(0, 0) ${rot(0)}` },
+      ], { duration: 820, delay, easing: 'ease-out', fill: 'backwards' });
+      curlCorner(c, 'right', { duration: 820, delay, easing: 'ease-out' });
+      return;
+    }
+    const dx = was - now;
+    if (Math.abs(dx) < 2) return;
+    wave++;
+    const dir = dx < 0 ? 1 : -1;                       // 1 = moving right
+    const swing = Math.min(11, 4 + Math.abs(dx) / 45);  // further moves swing harder
+    const bend = (k) => `perspective(700px) rotateY(${(-dir * 12 * k).toFixed(1)}deg)`; // trailing side leans back
+    const timing = { duration: 760, delay, easing: 'cubic-bezier(.3, .7, .4, 1)', fill: 'backwards' };
+    c.animate([
+      { transform: `translate(${dx}px, 0) ${bend(0)} ${rot(0)}` },
+      { transform: `translate(${dx * .4}px, -7px) ${bend(1)} ${rot(dir * swing)}`, offset: .38 },
+      { transform: `translate(${dir * 3}px, -2px) ${bend(-.25)} ${rot(-dir * swing * .45)}`, offset: .66 },
+      { transform: `translate(0, 0) ${bend(0)} ${rot(dir * swing * .15)}`, offset: .86 },
+      { transform: `translate(0, 0) ${bend(0)} ${rot(0)}` },
+    ], timing);
+    curlCorner(c, dir > 0 ? 'left' : 'right', timing);
+  });
 }
 
 // Show the end shades, arrows and an off-screen count when the rail is wider than the window.
